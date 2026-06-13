@@ -3,6 +3,7 @@ import type { WebSocket } from 'ws';
 import { Sim } from '../src/sim/sim';
 import type { PlayerMeta } from '../src/sim/sim';
 import { DT, Entity, SimEvent, dist2d } from '../src/sim/types';
+import { threatEntries } from '../src/sim/threat';
 import { zoneAt, DUNGEONS } from '../src/sim/data';
 import { saveCharacterState, openPlaySession, closePlaySession, insertChatLogs } from './db';
 import { ChatLogger } from './chat_log';
@@ -138,6 +139,9 @@ function dynamicFields(e: Entity): Record<string, unknown> {
   if (e.sitting || e.eating || e.drinking) out.sit = 1;
   if (e.aggroTargetId !== null) out.aggro = e.aggroTargetId;
   if (e.tappedById !== null) out.tap = e.tappedById;
+  if (e.ownerId !== null) out.own = e.ownerId;
+  // top hate-table entries so the party threat meter shows real numbers
+  if (e.kind === 'mob' && !e.dead && e.threat.size > 0) out.thr = threatEntries(e, 8);
   if (e.auras.length > 0) {
     out.auras = e.auras.map((a): WireAura => ({ id: a.id, name: a.name, kind: a.kind, rem: round2(a.remaining), dur: a.duration }));
   }
