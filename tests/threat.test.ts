@@ -309,6 +309,26 @@ describe('rogue stealth', () => {
     expect(wolf.aiState).not.toBe('idle');
   });
 
+  it('scales stealth detection by observer level for creatures', () => {
+    const sim = makeSim('rogue');
+    sim.setPlayerLevel(10);
+    const wolf = nearestMob(sim, 'forest_wolf');
+    wolf.level = 10;
+    sim.player.level = wolf.level;
+    teleport(sim, sim.player, wolf.pos.x + 200, wolf.pos.z);
+    sim.castAbility('stealth');
+    expect(sim.player.auras.some((a) => a.kind === 'stealth')).toBe(true);
+
+    wolf.wanderTarget = null;
+    teleport(sim, sim.player, wolf.pos.x + 6, wolf.pos.z);
+    for (let i = 0; i < 20; i++) sim.tick();
+    expect(wolf.aiState).toBe('idle');
+
+    wolf.level = 15;
+    for (let i = 0; i < 20 && wolf.aiState === 'idle'; i++) sim.tick();
+    expect(wolf.aiState).not.toBe('idle');
+  });
+
   it('cannot stealth in combat; acting breaks stealth; ambush requires it', () => {
     const sim = makeSim('rogue');
     sim.setPlayerLevel(16);
