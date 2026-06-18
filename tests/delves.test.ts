@@ -139,9 +139,9 @@ describe('delve spatial band', () => {
 
 
   it('isDelvePos covers the full room footprint west of DELVE_X_MIN (regression: camera yank bug)', () => {
-    // Rooms are 48 u wide, centred at DELVE_X_MIN. The west wall sits at
-    // world-x ≈ 3576 (slot 0). Before DELVE_BAND_X_MIN, x < DELVE_X_MIN was
-    // classified as isArenaPos, yanking the camera ~574 u west to arena (x≈3000).
+    // Rooms are 48 u wide, centred at DELVE_X_MIN (4800). The west wall sits at
+    // world-x ≈ 4776 (slot 0). Before DELVE_BAND_X_MIN, the west half of the room
+    // was misclassified as isArenaPos, yanking the camera toward the arena band.
     const origin = delveOrigin(0, 0); // { x: DELVE_X_MIN, z: ... }
 
     // West half of the room must still be a delve pos

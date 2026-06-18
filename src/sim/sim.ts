@@ -2957,7 +2957,9 @@ export class Sim {
       cx = nx; cz = nz; moved += adv;
     }
     if (moved <= 0) return 0;
-    const resolved = resolvePosition(this.cfg.seed, cx, cz, BODY_RADIUS);
+    // resolveMovePoint is a no-op wrapper over resolvePosition outside a delve, and
+    // applies the run's module colliders + portcullis doors when target is inside one.
+    const resolved = this.resolveMovePoint(cx, cz, BODY_RADIUS, target);
     target.pos.x = resolved.x;
     target.pos.z = resolved.z;
     target.pos.y = groundHeight(resolved.x, resolved.z, this.cfg.seed);

@@ -584,7 +584,7 @@ export class DungeonInteriors {
       for (let i = 0; i < mats.length; i++) mesh.setMatrixAt(i, mats[i]);
       mesh.instanceMatrix.needsUpdate = true;
       mesh.computeBoundingSphere();
-      // Delve instances sit at x≈3600; per-kind bounds can false-cull when the
+      // Delve instances sit at x≈4800; per-kind bounds can false-cull when the
       // chase cam hugs a side wall, so always draw the merged interior batch.
       mesh.frustumCulled = false;
       mesh.castShadow = !this.lowGfx && CASTER_KINDS.has(kind);
