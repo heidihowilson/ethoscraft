@@ -33,6 +33,10 @@ const MOB_IDS = [
   // Delve mobs (Collapsed Reliquary + placeholder trial crypt).
   'reliquary_funeral_ringer', 'reliquary_gravecall_acolyte', 'reliquary_ledger_wraith',
   'reliquary_bonewalker', 'reliquary_saintless_effigy', 'deacon_varric', 'acolyte_tessa', 'placeholder_boss',
+  // Brightwood Glade wildlife pack
+  'brightwood_hare', 'glade_fox', 'spotted_fawn', 'meadow_crane', 'thornpelt_badger',
+  'dawnmane_doe', 'bramble_lynx', 'brightwood_stag', 'grovetusk_boar', 'sunhide_bear',
+  'brightwood_monarch',
 ] as const;
 
 const NPC_IDS = [
@@ -40,7 +44,7 @@ const NPC_IDS = [
   'smith_haldren', 'fisherman_brandt', 'foreman_odell', 'warden_fenwick', 'brother_aldric_fen',
   'provisioner_hale', 'herbalist_yara', 'scout_maren', 'captain_thessaly',
   'brother_aldric_highwatch', 'scout_maren_highwatch', 'quartermaster_bree', 'armorer_hode',
-  'loremaster_caddis',
+  'loremaster_caddis', 'ranger_elwyn',
   // Delve board NPC (Collapsed Reliquary).
   'brother_halven',
 ] as const;
@@ -60,6 +64,10 @@ const QUEST_IDS = [
   'q_breaking_the_seal', 'q_voice_below', 'q_sanctum_gate', 'q_korgath', 'q_velkhar',
   'q_gravewyrm', 'q_the_codfather', 'q_nythraxis_restless_dead', 'q_nythraxis_graves',
   'q_nythraxis_sealed_crypt', 'q_nythraxis_bound_guardian',
+  'q_brightwood_thinning', 'q_brightwood_monarch',
+  'q_ledger_first_duty', 'q_ledger_teeth', 'q_ledger_reedwater', 'q_ledger_silk',
+  'q_ledger_brood', 'q_ledger_deepvermin', 'q_ledger_toll', 'q_ledger_vigil',
+  'q_ledger_great_boar', 'q_ledger_outlaw_captain',
 ] as const;
 
 const ZONE_IDS = ['eastbrook_vale', 'mirefen_marsh', 'thornpeak_heights'] as const;
