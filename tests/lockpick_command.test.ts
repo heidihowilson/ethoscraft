@@ -154,6 +154,30 @@ describe('lockpick — failure & abandon', () => {
     expect(run.lockpick).not.toBeNull();
     expect(run.lockpick!.lootTier).toBe('medium');
   });
+
+  it('leaveDelve tears down the leaver\'s live session (attempt preserved)', () => {
+    const sim = makeSim();
+    const run = enterFinale(sim);
+    killBoss(sim, run);
+    const chestId = standOnChest(sim, run);
+    sim.lockpickEngage(chestId, 1);
+    expect(run.lockpick).not.toBeNull();
+    sim.leaveDelve();
+    expect(run.lockpick).toBeNull();
+    expect(run.objectState[chestId].attemptAvailable).toBe(true);
+  });
+
+  it('removePlayer (disconnect) tears down the owner\'s live session (attempt preserved)', () => {
+    const sim = makeSim();
+    const run = enterFinale(sim);
+    killBoss(sim, run);
+    const chestId = standOnChest(sim, run);
+    sim.lockpickEngage(chestId, 1);
+    expect(run.lockpick).not.toBeNull();
+    sim.removePlayer(sim.playerId);
+    expect(run.lockpick).toBeNull();
+    expect(run.objectState[chestId].attemptAvailable).toBe(true);
+  });
 });
 
 describe('lockpick — fog boundary (anti-cheat)', () => {

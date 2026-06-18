@@ -54,6 +54,25 @@ describe('delve companions', () => {
     expect(bark?.barkId).toBe('boss_pull');
   });
 
+  it('does not repeat a bark id within a run (dedup guard)', () => {
+    const sim = makeSim();
+    sim.setPlayerLevel(10);
+    teleport(sim, 0, 0);
+    sim.enterDelve('collapsed_reliquary', 'normal');
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.modules = ['reliquary_finale'];
+    run.moduleIndex = 0;
+    (sim as any).spawnDelveModule(run);
+    const boss = [...sim.entities.values()].find((e) => e.templateId === 'deacon_varric');
+    (sim as any).aggroMob(boss, sim.player, false);
+    const first = sim.tick().find((e) => e.type === 'companionBark' && e.barkId === 'boss_pull');
+    expect(first).toBeDefined();
+    // Re-trigger the same pull; the dedup guard must suppress a repeat bark.
+    (sim as any).aggroMob(boss, sim.player, false);
+    const second = sim.tick().find((e) => e.type === 'companionBark' && e.barkId === 'boss_pull');
+    expect(second).toBeUndefined();
+  });
+
   it('companion upgrade rank 2 costs 4 marks', () => {
     const sim = makeSim();
     const meta = (sim as any).players.get(sim.playerId);

@@ -145,7 +145,7 @@ describe('delve spatial band', () => {
     const origin = delveOrigin(0, 0); // { x: DELVE_X_MIN, z: ... }
 
     // West half of the room must still be a delve pos
-    expect(isDelvePos(origin.x - 2)).toBe(true);   // 3598 — exact repro coordinate
+    expect(isDelvePos(origin.x - 2)).toBe(true);   // 4798 — exact repro coordinate
     expect(isDelvePos(origin.x - 22)).toBe(true);  // walkable west edge
     expect(isDelvePos(origin.x - 24)).toBe(true);  // wall outer face
     expect(isDelvePos(origin.x)).toBe(true);        // room centre
@@ -172,6 +172,20 @@ describe('delve spatial band', () => {
   });
 
 
+
+  it('pins the absolute 4800 boundary against the arena seam (relocation regression)', () => {
+    // DELVE_X_MIN moved 3600 -> 4800 when v0.10.0 pushed the arena to x=4200.
+    // Pin the load-bearing constant and the exact arena/delve seam so a future
+    // arena or delve respacing that re-introduces overlap fails here.
+    expect(DELVE_X_MIN).toBe(4800);
+    // The seam: DELVE_BAND_X_MIN is the first delve x; the x just below it is arena.
+    expect(isArenaPos(DELVE_BAND_X_MIN - 1)).toBe(true);
+    expect(isDelvePos(DELVE_BAND_X_MIN - 1)).toBe(false);
+    expect(isDelvePos(DELVE_BAND_X_MIN)).toBe(true);
+    expect(isArenaPos(DELVE_BAND_X_MIN)).toBe(false);
+    // Keep a real gap between the arena anchor and the delve band.
+    expect(DELVE_BAND_X_MIN - ARENA_X).toBeGreaterThanOrEqual(500);
+  });
 
   it('enterReliquary places player in delve band near instance origin', () => {
 
@@ -462,6 +476,40 @@ describe('delve interactables and affixes', () => {
     sim.tick();
     expect(run.exitPortalOpen).toBe(true);
   });
+
+  it('restless_graves affix raises a reliquary_bonewalker a few seconds after trash dies', () => {
+    const sim = makeSim();
+    enterReliquary(sim);
+    const run = sim.delveRunForPlayer(sim.playerId)!;
+    run.affixes = ['restless_graves'];
+    // Spawn a piece of trash registered to the run, then kill it.
+    const origin = run.origin;
+    const trash = createMob(920001, MOBS.reliquary_ledger_wraith, 7, { x: origin.x, y: 0, z: origin.z + 10 });
+    (sim as any).addEntity(trash);
+    run.mobIds.push(trash.id);
+    (sim as any).dealDamage(sim.player, trash, trash.maxHp + 1, false, 'physical', null, 'hit', true);
+    sim.tick();
+    const bonewalkers = () => [...sim.entities.values()].filter((e) => e.templateId === 'reliquary_bonewalker').length;
+    // Add is delayed ~3s, so none yet.
+    expect(bonewalkers()).toBe(0);
+    // The trash death queued a pending add (regression: it used to reference an
+    // undefined mob id and silently spawn nothing).
+    expect(run.restlessPending.length).toBeGreaterThanOrEqual(1);
+    for (let i = 0; i < 20 * 4; i++) sim.tick();
+    expect(bonewalkers()).toBeGreaterThanOrEqual(1);
+  });
+
+  it('rollDelveAffixes only draws implemented affixes (no inert Heroic affix)', () => {
+    const implemented = new Set(['restless_graves', 'bad_air', 'candleblind']);
+    // Try many seeds; every Heroic roll must be an implemented affix.
+    for (let seed = 1; seed <= 200; seed++) {
+      const sim = makeSim('warrior', seed);
+      enterReliquary(sim, 'heroic');
+      const run = sim.delveRunForPlayer(sim.playerId)!;
+      for (const id of run.affixes) expect(implemented.has(id)).toBe(true);
+      expect(run.affixes.length).toBe(1); // Heroic affixCount = 1
+    }
+  });
 });
 
 describe('delve reward chest + surface exit flow', () => {
@@ -672,5 +720,108 @@ describe('delve reward chest + surface exit flow', () => {
     expect(run.modules[run.moduleIndex]).toBe('reliquary_finale');
     // No reward chest exists yet (boss not killed)
     expect(run.rewardChestId).toBeNull();
+  });
+
+  // Clear the finale once and release the run slot so the next clear gets a fresh
+  // run (enterDelve reuses the player's own run, and a completed run would not
+  // re-spawn the chest). ante 3 = low tier = 0 bonus marks, isolating base marks.
+  function clearOnce(sim: ReturnType<typeof makeSim>, ante: 1 | 2 | 3 = 3) {
+    const run = enterFinale(sim);
+    killBoss(sim, run);
+    pickLockFlawless(sim, run, ante);
+    return run;
+  }
+
+  it('daily reset + first-vs-repeat XP keys off the injected UTC day (deterministic)', () => {
+    const sim = makeSim();
+    sim.utcDay = '2026-06-18';
+    sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
+    const meta = (sim as any).players.get(sim.playerId);
+    const rewards = DELVES.collapsed_reliquary.baseRewards;
+
+    // Capture the XP granted by the delve clear (the last grantXp call in the path).
+    let lastXp = 0;
+    const realGrantXp = (sim as any).grantXp.bind(sim);
+    (sim as any).grantXp = (xp: number, m: any) => { lastXp = xp; return realGrantXp(xp, m); };
+
+    // First clear today: first-clear XP + clearKey recorded + markClears 1.
+    let run = enterFinale(sim);
+    killBoss(sim, run);
+    lastXp = 0;
+    pickLockFlawless(sim, run, 3);
+    expect(lastXp).toBe(rewards.firstClearXp);
+    expect(meta.delveDaily.firstClearXp.has('collapsed_reliquary:normal')).toBe(true);
+    expect(meta.delveDaily.markClears).toBe(1);
+    expect(meta.delveClears['collapsed_reliquary:normal']).toBe(1);
+    (sim as any).freeDelveRun(run);
+
+    // Second clear SAME day: repeat XP, markClears 2.
+    run = enterFinale(sim);
+    killBoss(sim, run);
+    lastXp = 0;
+    pickLockFlawless(sim, run, 3);
+    expect(lastXp).toBe(rewards.repeatClearXp);
+    expect(meta.delveDaily.markClears).toBe(2);
+    (sim as any).freeDelveRun(run);
+
+    // Day rollover: the daily window resets (firstClearXp cleared, markClears 0).
+    sim.utcDay = '2026-06-19';
+    run = enterFinale(sim);
+    killBoss(sim, run);
+    lastXp = 0;
+    pickLockFlawless(sim, run, 3);
+    expect(meta.delveDaily.date).toBe('2026-06-19');
+    expect(meta.delveDaily.markClears).toBe(1); // reset to 0, then this clear
+    expect(lastXp).toBe(rewards.firstClearXp); // first clear again after reset
+  });
+
+  it('refreshDelveDaily never reads the wall clock (no reset when utcDay unset)', () => {
+    const sim = makeSim();
+    // utcDay defaults to '' (deterministic / headless): the window must not roll over.
+    expect(sim.utcDay).toBe('');
+    sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
+    const meta = (sim as any).players.get(sim.playerId);
+    meta.delveDaily = { date: 'pinned', firstClearXp: new Set(['x']), markClears: 2 };
+    (sim as any).refreshDelveDaily(meta);
+    expect(meta.delveDaily.date).toBe('pinned'); // unchanged — no wall-clock read
+    expect(meta.delveDaily.markClears).toBe(2);
+  });
+
+  it('delveMarkPayout follows the PRD §6.5 daily formula + §6.7 Heroic rewardMult', () => {
+    const sim = makeSim();
+    const meta = (sim as any).players.get(sim.playerId);
+    meta.delveDaily.firstClearXp = new Set();
+    const delve = DELVES.collapsed_reliquary;
+    const normalTier = delve.tiers.find((t) => t.id === 'normal');
+    const heroicTier = delve.tiers.find((t) => t.id === 'heroic');
+    const runN = { tierId: 'normal' } as any;
+    const runH = { tierId: 'heroic' } as any;
+    // First 3 completions/day (markClears < 3): full Marks (>=1) for both tiers.
+    for (const mc of [0, 1, 2]) {
+      meta.delveDaily.markClears = mc;
+      expect((sim as any).delveMarkPayout(runN, normalTier, meta)).toBe(1);
+      expect((sim as any).delveMarkPayout(runH, heroicTier, meta)).toBeGreaterThanOrEqual(1);
+    }
+    // After 3: Heroic 1 guaranteed; Normal 50% (sampling sees both 0 and 1).
+    meta.delveDaily.markClears = 3;
+    expect((sim as any).delveMarkPayout(runH, heroicTier, meta)).toBe(1);
+    const normalOutcomes = new Set<number>();
+    for (let i = 0; i < 50; i++) { meta.delveDaily.markClears = 3; normalOutcomes.add((sim as any).delveMarkPayout(runN, normalTier, meta)); }
+    expect(normalOutcomes.has(0)).toBe(true);
+    expect(normalOutcomes.has(1)).toBe(true);
+  });
+
+  it('unlocks one lore journal entry per clear, capped at five (PRD §6.4)', () => {
+    const sim = makeSim();
+    sim.utcDay = '2026-06-18';
+    sim.setPlayerLevel(DELVES.collapsed_reliquary.minLevel);
+    const meta = (sim as any).players.get(sim.playerId);
+    const order = ['eastbrook_ledger', 'first_collapse', 'gravecaller_mark', 'bell_below', 'tessa_note'];
+    for (let i = 1; i <= 6; i++) {
+      const run = clearOnce(sim);
+      expect(meta.delveLoreUnlocked.size).toBe(Math.min(i, 5));
+      (sim as any).freeDelveRun(run);
+    }
+    expect([...meta.delveLoreUnlocked]).toEqual(order);
   });
 });
