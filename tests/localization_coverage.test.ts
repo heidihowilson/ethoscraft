@@ -1,32 +1,6 @@
-import { beforeAll, describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import {
-	en,
-	es,
-	es_ES,
-	fr_FR,
-	fr_CA,
-	en_CA,
-	it_IT,
-	de_DE,
-	zh_CN,
-	zh_TW,
-	ko_KR,
-	ja_JP,
-	pt_BR,
-	ru_RU,
-	formatDateTime,
-	formatMoney,
-	formatNumber,
-	ensureLocaleLoaded,
-	isSupportedLanguage,
-	languageTag,
-	setLanguage,
-	supportedLanguages,
-	t,
-	type TranslationKey,
-} from "../src/ui/i18n";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
 	ABILITIES,
 	CLASSES,
@@ -37,6 +11,7 @@ import {
 	QUESTS,
 	ZONES,
 } from "../src/sim/data";
+import type { PlayerClass } from "../src/sim/types";
 import {
 	assertEntityTranslationsReady,
 	entityTranslationFallbackLog,
@@ -46,11 +21,36 @@ import {
 	tEntity,
 } from "../src/ui/entity_i18n";
 import {
+	de_DE,
+	en,
+	en_CA,
+	ensureLocaleLoaded,
+	es,
+	es_ES,
+	formatDateTime,
+	formatMoney,
+	formatNumber,
+	fr_CA,
+	fr_FR,
+	isSupportedLanguage,
+	it_IT,
+	ja_JP,
+	ko_KR,
+	languageTag,
+	pt_BR,
+	ru_RU,
+	setLanguage,
+	supportedLanguages,
+	type TranslationKey,
+	t,
+	zh_CN,
+	zh_TW,
+} from "../src/ui/i18n";
+import {
 	hasTalentTitleOverride,
 	renderTalentManifestEntry,
 	talentTranslationManifest,
 } from "../src/ui/talent_i18n";
-import type { PlayerClass } from "../src/sim/types";
 
 const locales: Record<string, typeof en> = {
 	es,

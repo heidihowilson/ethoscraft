@@ -1,13 +1,13 @@
 import { MOBS } from "../data";
 import { MobRuntime, sameAllegiance, socialPullRadius } from "../mob_behavior";
 import {
+	addThreat,
 	MELEE_SWITCH_MULT,
 	RANGED_SWITCH_MULT,
-	addThreat,
 	stealthDetectionRadius,
 } from "../threat";
 import type { Entity, MobTemplate, Vec3 } from "../types";
-import { DT, MELEE_RANGE, dist2d } from "../types";
+import { DT, dist2d, MELEE_RANGE } from "../types";
 
 export interface MobSpatialIndex {
 	forEachInRadius(

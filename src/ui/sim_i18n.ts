@@ -11,17 +11,17 @@
 // The S3 guard in tests/localization_fixes.test.ts parses src/sim/sim.ts, enumerates
 // every player-facing emit site, and fails if any is no longer recognized by a client
 // matcher — so a new unhandled sim string cannot ship silently.
-import { ITEMS, MOBS, ABILITIES } from "../sim/data";
+import { ABILITIES, ITEMS, MOBS } from "../sim/data";
+import { tEntity } from "./entity_i18n";
 import {
-	getLanguage,
-	supportedLanguages,
-	t,
 	formatNumber,
+	getLanguage,
 	type InterpolationValues,
 	type SupportedLanguage,
+	supportedLanguages,
 	type TranslationKey,
+	t,
 } from "./i18n";
-import { tEntity } from "./entity_i18n";
 
 const baseEnTable = {
 	"error.lineOfSight": "Line of sight.",
