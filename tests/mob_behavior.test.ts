@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+	DEFAULT_SOCIAL_PULL_RADIUS,
 	FLEE_MAX_SPEED,
 	InstanceLeashPolicy,
 	MobRuntime,
-	MURLOC_SOCIAL_PULL_RADIUS,
 	WorldLeashPolicy,
 } from "../src/sim/mob_behavior";
 import type { Entity, MobTemplate } from "../src/sim/types";
@@ -159,13 +159,14 @@ describe("MobRuntime", () => {
 				willFlee: true,
 				allegiance: "template_faction",
 				type: "murloc",
+				socialPullRadius: 8,
 			}),
 		);
 
 		expect(runtime.aggression).toBe("neutral");
 		expect(runtime.willFlee).toBe(true);
 		expect(runtime.allegiance).toBe("gravecaller_cult");
-		expect(runtime.socialPullRadius).toBe(MURLOC_SOCIAL_PULL_RADIUS);
+		expect(runtime.socialPullRadius).toBe(8);
 		expect(runtime.fleeMoveSpeed(2)).toBe(FLEE_MAX_SPEED);
 	});
 
@@ -184,6 +185,16 @@ describe("MobRuntime", () => {
 				),
 			),
 		).toBe(true);
+	});
+
+	it("uses authored social pull radius instead of deriving it from mob type", () => {
+		expect(
+			new MobRuntime(entity(), template({ type: "murloc" })).socialPullRadius,
+		).toBe(DEFAULT_SOCIAL_PULL_RADIUS);
+		expect(
+			new MobRuntime(entity(), template({ socialPullRadius: 8 }))
+				.socialPullRadius,
+		).toBe(8);
 	});
 });
 

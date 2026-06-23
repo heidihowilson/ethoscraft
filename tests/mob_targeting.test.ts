@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MobTargeting } from "../src/sim/mobs/mob_targeting";
+import { MobTargeting } from "../src/sim/mob_targeting";
 import type { Entity, MobTemplate, Vec3 } from "../src/sim/types";
 
 type RadiusVisitor = (entity: Entity, distanceSquared: number) => void;

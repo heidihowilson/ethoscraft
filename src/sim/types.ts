@@ -321,6 +321,8 @@ export interface MobTemplate {
 	aggression?: MobAggression;
 	willFlee?: boolean;
 	allegiance?: string;
+	socialPullRadius?: number;
+	starterPace?: boolean;
 	hpPerLevel: number;
 	hpBase: number;
 	dmgBase: number; // min dmg at level 1

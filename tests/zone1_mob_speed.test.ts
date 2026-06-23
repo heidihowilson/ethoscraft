@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZONE1_MOBS } from "../src/sim/content/zone1";
 import { createMob } from "../src/sim/entity";
-import { RUN_SPEED } from "../src/sim/types";
+import { type MobTemplate, RUN_SPEED } from "../src/sim/types";
 
 describe("Eastbrook Vale mob movement speed", () => {
 	it("keeps authored starter-zone base speeds at or below player speed, except pets", () => {
@@ -28,9 +28,27 @@ describe("Eastbrook Vale mob movement speed", () => {
 			z: 0,
 		});
 
-		expect(levelOneWolf.moveSpeed).toBeCloseTo(RUN_SPEED * 0.7, 5);
-		expect(levelFiveWolf.moveSpeed).toBeCloseTo(RUN_SPEED * (0.7 + 4 / 30), 5);
-		expect(levelTenWolf.moveSpeed).toBe(RUN_SPEED);
+		expect(levelOneWolf.moveSpeed).toBeCloseTo(
+			ZONE1_MOBS.forest_wolf.moveSpeed * 0.7,
+			5,
+		);
+		expect(levelFiveWolf.moveSpeed).toBeCloseTo(
+			ZONE1_MOBS.forest_wolf.moveSpeed * (0.7 + 4 / 30),
+			5,
+		);
+		expect(levelTenWolf.moveSpeed).toBe(ZONE1_MOBS.forest_wolf.moveSpeed);
+	});
+
+	it("uses the authored starter pace flag instead of a hardcoded mob id allowlist", () => {
+		const authoredStarterMob: MobTemplate = {
+			...ZONE1_MOBS.forest_wolf,
+			id: "new_starter_test_mob",
+			moveSpeed: RUN_SPEED * 0.8,
+			starterPace: true,
+		};
+		const normalMob = createMob(6, authoredStarterMob, 1, { x: 0, y: 0, z: 0 });
+
+		expect(normalMob.moveSpeed).toBeCloseTo(RUN_SPEED * 0.8 * 0.7, 5);
 	});
 
 	it("does not speed-scale starter-zone elites or pets", () => {
@@ -88,5 +106,6 @@ describe("Eastbrook Vale mob behavior authoring", () => {
 		expect(ZONE1_MOBS.mudfin_murloc.aggression).toBeUndefined();
 		expect(ZONE1_MOBS.mudfin_murloc.willFlee).toBe(true);
 		expect(ZONE1_MOBS.mudfin_murloc.allegiance).toBe("mudfin_murlocs");
+		expect(ZONE1_MOBS.mudfin_murloc.socialPullRadius).toBe(8);
 	});
 });

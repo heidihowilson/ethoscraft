@@ -102,7 +102,7 @@ import {
 	effectiveMobMeleeRange,
 	type MobCombatProfile,
 } from "./mob_combat";
-import { MobTargeting } from "./mobs/mob_targeting";
+import { MobTargeting } from "./mob_targeting";
 import {
 	findPlayerPath,
 	PLAYER_BODY_RADIUS,

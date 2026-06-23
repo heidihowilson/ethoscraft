@@ -8,33 +8,11 @@ import type {
 	Stats,
 	Vec3,
 } from "./types";
-import { EQUIP_SLOTS, RUN_SPEED } from "./types";
-
-const STARTER_ZONE_SPEED_SCALED_MOBS = new Set([
-	"forest_wolf",
-	"old_greyjaw",
-	"wild_boar",
-	"webwood_spider",
-	"sableweb_hatchling",
-	"mudfin_murloc",
-	"tunnel_rat",
-	"vale_bandit",
-	"restless_bones",
-	"brightwood_hare",
-	"glade_fox",
-	"spotted_fawn",
-	"meadow_crane",
-	"thornpelt_badger",
-	"dawnmane_doe",
-	"bramble_lynx",
-	"brightwood_stag",
-	"grovetusk_boar",
-	"sunhide_bear",
-]);
+import { EQUIP_SLOTS } from "./types";
 
 function initializedMobMoveSpeed(template: MobTemplate, level: number): number {
 	if (
-		!STARTER_ZONE_SPEED_SCALED_MOBS.has(template.id) ||
+		template.starterPace !== true ||
 		template.elite ||
 		template.boss ||
 		template.petRole
@@ -42,7 +20,7 @@ function initializedMobMoveSpeed(template: MobTemplate, level: number): number {
 		return template.moveSpeed;
 
 	const levelMult = Math.min(1, 0.7 + Math.max(0, level - 1) / 30);
-	return RUN_SPEED * levelMult;
+	return template.moveSpeed * levelMult;
 }
 
 function baseEntity(id: number, pos: Vec3): Entity {
