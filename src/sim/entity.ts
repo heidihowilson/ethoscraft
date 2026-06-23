@@ -8,7 +8,42 @@ import type {
 	Stats,
 	Vec3,
 } from "./types";
-import { EQUIP_SLOTS } from "./types";
+import { EQUIP_SLOTS, RUN_SPEED } from "./types";
+
+const STARTER_ZONE_SPEED_SCALED_MOBS = new Set([
+	"forest_wolf",
+	"old_greyjaw",
+	"wild_boar",
+	"webwood_spider",
+	"sableweb_hatchling",
+	"mudfin_murloc",
+	"tunnel_rat",
+	"vale_bandit",
+	"restless_bones",
+	"brightwood_hare",
+	"glade_fox",
+	"spotted_fawn",
+	"meadow_crane",
+	"thornpelt_badger",
+	"dawnmane_doe",
+	"bramble_lynx",
+	"brightwood_stag",
+	"grovetusk_boar",
+	"sunhide_bear",
+]);
+
+function initializedMobMoveSpeed(template: MobTemplate, level: number): number {
+	if (
+		!STARTER_ZONE_SPEED_SCALED_MOBS.has(template.id) ||
+		template.elite ||
+		template.boss ||
+		template.petRole
+	)
+		return template.moveSpeed;
+
+	const levelMult = Math.min(1, 0.7 + Math.max(0, level - 1) / 30);
+	return RUN_SPEED * levelMult;
+}
 
 function baseEntity(id: number, pos: Vec3): Entity {
 	return {
@@ -346,7 +381,7 @@ export function createMob(
 	// Armor scales from level 1 like hp/dmg above: a template has no armorBase,
 	// so a level-1 mob gets 0 and each level adds armorPerLevel.
 	e.stats.armor = Math.round(template.armorPerLevel * (level - 1));
-	e.moveSpeed = template.moveSpeed;
+	e.moveSpeed = initializedMobMoveSpeed(template, level);
 	e.allegiance = template.allegiance ?? null;
 	e.scale = template.scale;
 	e.color = template.color;
