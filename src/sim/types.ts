@@ -207,9 +207,10 @@ export interface LootEntry {
   rollGroup?: string;
 }
 
-export type MobFamily =
-  | 'beast' | 'humanoid' | 'murloc' | 'spider' | 'kobold' | 'undead'
+export type MobType =
+  | 'animal' | 'human' | 'humanoid' | 'murloc' | 'spider' | 'kobold' | 'undead'
   | 'troll' | 'ogre' | 'elemental' | 'dragonkin' | 'demon';
+export type MobAggression = 'neutral' | 'aggressive';
 export type PetMode = 'passive' | 'defensive' | 'aggressive';
 export type PetRole = 'melee_tank' | 'ranged_dps';
 
@@ -218,7 +219,10 @@ export interface MobTemplate {
   name: string;
   minLevel: number;
   maxLevel: number;
-  family: MobFamily;
+  mobType: MobType;
+  aggression?: MobAggression;
+  willFlee?: boolean;
+  allegiance?: string;
   hpPerLevel: number;
   hpBase: number;
   dmgBase: number; // min dmg at level 1
@@ -894,6 +898,7 @@ export interface Entity {
   forcedTargetId: number | null; // taunt/growl: attack this target while the timer runs
   forcedTargetTimer: number; // seconds left on the forced-attack window
   ownerId: number | null; // controlled pets: owning player's entity id (null = wild)
+  allegiance: string | null; // AI faction for social pulls and flee-help; null = unaffiliated
   petMode: PetMode; // hunter pet behavior stance
   petTauntTimer: number; // controlled pet Growl cooldown
   petPath: Vec3[]; // controlled pet heel route around obstacles; consumed front-to-back (like chargePath)
@@ -914,6 +919,7 @@ export interface Entity {
   nythraxis?: NythraxisEncounterState; // sim-only state for the Nythraxis raid encounter
   spawnPos: Vec3;
   leashAnchor: Vec3 | null; // refreshed by hostile player/pet actions; spawnPos remains the true home
+  pursuitStallTimer: number; // seconds a pursuing mob has failed to close distance to its target
   evadeStall: number; // seconds an evading mob has failed to get closer to home; snaps it home if it can't path back (e.g. across water)
   fleeTimer: number; // seconds left in a low-HP panic flee; counts down in the 'flee' state
   fleeReturnTimer: number; // grace after a panic flee hits leash edge, letting it run back before normal leash reset resumes

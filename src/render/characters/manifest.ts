@@ -368,7 +368,7 @@ export const VISUALS: Record<string, VisualDef> = {
     clips: WILD_BOAR, tint: 'entity', tintStrength: 0.4,
   },
   // Quaternius animal rig (shares clip names with wolf) — fox/deer/critters that
-  // would otherwise fall back to mob_wolf via FAMILY_KEYS['beast'].
+  // would otherwise fall back to mob_wolf via FAMILY_KEYS['animal'].
   mob_fox: {
     url: `${CREATURES}/fox.glb`, height: 1.0,
     clips: animal(['Attack']), tint: 'entity', tintStrength: 0.35,
@@ -556,7 +556,7 @@ export const VISUALS: Record<string, VisualDef> = {
 
 // ---------------------------------------------------------------------------
 // Dispatch: entity -> visual key (mirrors the old buildRigFor selection:
-// e.kind + e.templateId + MOBS[id].family)
+// e.kind + e.templateId + MOBS[id].mobType)
 // ---------------------------------------------------------------------------
 
 const MOB_KEYS: Record<string, string> = {
@@ -611,7 +611,7 @@ const MOB_KEYS: Record<string, string> = {
 };
 
 const FAMILY_KEYS: Record<string, string> = {
-  beast: 'mob_wolf',
+  animal: 'mob_wolf',
   humanoid: 'mob_bandit',
   murloc: 'mob_murloc',
   spider: 'mob_spider',
@@ -650,7 +650,7 @@ export function visualKeyFor(e: Entity): string {
   if (e.kind === 'mob') {
     const override = MOB_KEYS[e.templateId];
     if (override) return override;
-    const family = MOBS[e.templateId]?.family;
+    const family = MOBS[e.templateId]?.mobType;
     return (family && FAMILY_KEYS[family]) || 'mob_bandit';
   }
   // npcs — Brother Aldric recurs in every hub under suffixed ids

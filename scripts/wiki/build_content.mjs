@@ -172,13 +172,15 @@ const warlockPets = Object.values(WARLOCK_PET_MOBS).map((p) => {
 // and raid encounters) and warlock pet summons, so nothing here spoils instanced content.
 const FAMILY_ORDER = ['beast', 'spider', 'murloc', 'kobold', 'humanoid', 'troll', 'ogre', 'undead', 'elemental', 'dragonkin'];
 const famMap = {};
+const guideFamilyForMobType = (mobType) => mobType === 'animal' ? 'beast' : mobType;
 for (const [id, m] of Object.entries({ ...ZONE1_MOBS, ...ZONE2_MOBS, ...ZONE3_MOBS })) {
   if (m.elite || m.boss) continue;
   if (id.startsWith('warlock_')) continue; // summoned pets, not wild creatures
   if (/vision/i.test(id) || /^Vision\b/.test(m.name)) continue; // cinematic apparitions, not creatures
   const vk = mobVisualKey(id);
   const tint = tintFor(vk, m.color ?? 0xffffff);
-  (famMap[m.family] ??= new Map()).set(m.name, {
+  const family = guideFamilyForMobType(m.mobType);
+  (famMap[family] ??= new Map()).set(m.name, {
     name: m.name, min: m.minLevel, max: m.maxLevel, rare: !!m.rare,
     templateId: id, model: modelKeyFor(vk), ...(tint != null ? { tint: hex(tint) } : {}),
   });

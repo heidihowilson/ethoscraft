@@ -50,5 +50,6 @@ export function overscanRect(size: number, overscan: number): DrawRect {
  *  their creature-family crest (humanoid when the family is unknown). */
 export function crestIdForEntity(kind: string, family: string | undefined): string {
   if (kind === 'npc') return 'status_npc';
+  if (family === 'animal') return 'family_beast';
   return `family_${family ?? 'humanoid'}`;
 }

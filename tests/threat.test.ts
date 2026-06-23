@@ -1099,10 +1099,10 @@ describe('social aggro pull radius (#102)', () => {
     return [murlocs[0], murlocs[1]];
   }
 
-  it('a murloc does not chain-pull a same-family neighbour 13yd away', () => {
+  it('a murloc does not chain-pull a same-allegiance neighbour 13yd away', () => {
     const sim = makeSim();
     const [a, b] = twoMurlocs(sim);
-    for (const m of [a, b]) { m.aiState = 'idle'; m.hostile = true; }
+    for (const m of [a, b]) { m.aiState = 'idle'; m.hostile = true; m.allegiance = 'mudfin_murlocs'; }
     teleport(sim, b, a.pos.x + 13, a.pos.z); // beyond the tuned murloc radius
     teleport(sim, sim.player, a.pos.x + 2, a.pos.z);
     (sim as any).grid.refresh(sim.entities.values());
@@ -1113,7 +1113,7 @@ describe('social aggro pull radius (#102)', () => {
   it('a murloc still pulls a neighbour within the tuned radius', () => {
     const sim = makeSim();
     const [a, b] = twoMurlocs(sim);
-    for (const m of [a, b]) { m.aiState = 'idle'; m.hostile = true; }
+    for (const m of [a, b]) { m.aiState = 'idle'; m.hostile = true; m.allegiance = 'mudfin_murlocs'; }
     teleport(sim, b, a.pos.x + 7, a.pos.z); // inside the murloc radius
     teleport(sim, sim.player, a.pos.x + 2, a.pos.z);
     (sim as any).grid.refresh(sim.entities.values());

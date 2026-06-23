@@ -9,6 +9,11 @@ import { ARENA_SPAWN_A, ARENA_SPAWN_B, ARENA_SPAWNS_A_2v2, ARENA_SPAWNS_B_2v2 } 
 import { lineOfSightClear, resolveMovement, resolvePosition } from './colliders';
 import { PLAYER_BODY_RADIUS, PLAYER_MAX_CLIMB_SLOPE, PLAYER_SWIM_DEPTH, findPlayerPath } from './pathfind';
 import { combatProfileForMob, effectiveMobMeleeRange, type MobCombatProfile } from './mob_combat';
+import {
+  FLEE_DURATION, FLEE_HELP_RADIUS, FLEE_HP_THRESHOLD, FLEE_RETURN_GRACE,
+  WORLD_LEASH_DISTANCE, effectiveFleeMoveSpeed, exceededWorldLeash, mobAggression, mobCanDistanceLeash,
+  mobWillFlee, sameAllegiance, socialPullRadius, targetEscapedMobInstance,
+} from './mob_behavior';
 import { createGroundObject, createMob, createNpc, createPlayer, recalcPlayerStats, PlayerEquipment } from './entity';
 import { canEquipItem } from './equipment_rules';
 import {
@@ -34,7 +39,7 @@ import {
   AbilityDef, AbilityEffect, Aura, AuraKind, CAST_PUSHBACK_SEC, CHANNEL_PUSHBACK_FRACTION, CONSUME_DURATION, ItemDef,
   DEFAULT_PARTY_LOOT_STRATEGIES,
   CONSUME_TICKS, CrowdControlDrCategory, DT, Entity, EquipSlot, FISHING_CAST_ID, FISHING_CAST_TIME, GCD,
-  CurrencyLootStrategy, INTERACT_RANGE, InvSlot, ItemLootStrategy, LootEntry, LootRollChoice, LootSlot, LootStrategies, MELEE_RANGE, MAX_LEVEL, MobFamily, MobTemplate,
+  CurrencyLootStrategy, INTERACT_RANGE, InvSlot, ItemLootStrategy, LootEntry, LootRollChoice, LootSlot, LootStrategies, MELEE_RANGE, MAX_LEVEL, MobTemplate,
   MoveInput, OverheadEmoteId, PetMode, PlayerClass, QuestProgress, QuestState, RUN_SPEED, SimConfig, SimEvent, TURN_SPEED, Vec3,
   angleTo, armorReduction, dist2d, emptyMoveInput, isConsuming, meleeMissChance, mobXpValue, normAngle,
   rageFromDealing, rageFromTaking, spellHitChance, xpForLevel, isQuestTurnInNpc, questTurnInNpcIds,
@@ -46,14 +51,13 @@ import {
   rankAllowsMechChroma, rankAllowsSkin, rollSkinRank,
 } from './content/skins';
 
-const LEASH_DISTANCE = 45;
-const DUNGEON_LEASH_DISTANCE = 70;
 // Classic "trivial con": a wild mob this many levels below the player goes
 // passive and will not auto-aggro from proximity (it still fights back if
 // attacked). Elites, rares, and bosses are never trivial.
 const TRIVIAL_LEVEL_GAP = 10;
 const CORPSE_DURATION = 60;
 const EVADE_SPEED_MULT = 1.6;
+const PURSUIT_STALL_TIMEOUT = 3;
 // An evading mob walks a straight line home (no pathfinding) and stalls if deep
 // water or a collider sits between it and its spawn. Since evading mobs are
 // immune while resetting, a permanent stall = a permanently unkillable mob. If it
@@ -64,19 +68,6 @@ const EVADE_STALL_TIMEOUT = 3;
 // only evaluated past the first entry when that straight step is obstructed.
 const MOVE_SLIDE_FAN = [0, 0.5, -0.5, 1.0, -1.0, 1.6, -1.6];
 const BACKPEDAL_MULT = 0.65;
-// Low-HP flee ("fear"): a cowardly mob at or below this HP fraction panics, turns
-// and runs from its attacker for FLEE_DURATION seconds at FLEE_SPEED_MULT speed,
-// calling same-family allies within FLEE_HELP_RADIUS to assist. It flees only once
-// per pull, then recovers its nerve and re-engages if it survived.
-const FLEE_HP_THRESHOLD = 0.2;
-const FLEE_DURATION = 5;
-const FLEE_SPEED_MULT = 1.4;
-const FLEE_MAX_SPEED = RUN_SPEED;
-const FLEE_RETURN_GRACE = 8;
-const FLEE_HELP_RADIUS = 8;
-// Only sentient, cowardly families flee; beasts/undead/elementals/dragonkin fight
-// to the death. Elites, rares, and bosses never flee regardless of family.
-const FLEEING_FAMILIES: ReadonlySet<MobFamily> = new Set(['humanoid', 'kobold', 'murloc', 'troll']);
 const GRAVITY = 16;
 const JUMP_VELOCITY = 6; // apex = v^2/2g ≈ 1.125 yd
 const MELEE_ARC = 2.2; // radians half-arc within which melee swings connect
@@ -259,15 +250,7 @@ const VENDOR_BUYBACK_LIMIT = 12;
 const INSTANCE_EMPTY_TIMEOUT = 300; // seconds before an empty instance resets
 const MAX_CLIMB_SLOPE = PLAYER_MAX_CLIMB_SLOPE; // rise/run above which a ground move is blocked (cliffs, world rim)
 
-// How far a mob pulls same-family neighbours into a fight ("social aggro").
-// Murlocs (the clustered water mobs players call "frogs") used to pull too much,
-// chain-aggroing the whole pond and making solo pulls impossible (#102). Tune
-// per family here; everything else falls back to the default.
 const POTION_COOLDOWN = 60; // seconds; shared cooldown across combat potions (#103)
-const DEFAULT_SOCIAL_PULL_RADIUS = 5;
-const SOCIAL_PULL_RADIUS: Partial<Record<MobFamily, number>> = {
-  murloc: 8,
-};
 const PACK_FRENZY_AURA_ID = 'pack_frenzy'; // attack-speed buff granted to surviving packmates
 const BLOOD_FRENZY_AURA_ID = 'blood_frenzy'; // self attack-speed buff a wounded frenzyOnHit mob gains
 const SWIM_SURFACE_Y = WATER_LEVEL - 0.75; // body bobs just below the water line
@@ -934,6 +917,7 @@ export class Sim {
         mob.facing = pending.facing;
         mob.prevFacing = pending.facing;
         mob.dungeonId = pending.dungeonId;
+        if (pending.dungeonId) mob.allegiance = `instance:${pending.dungeonId}`;
         this.addEntity(mob);
       }
       this.pendingMobRespawns.splice(i, 1);
@@ -1853,11 +1837,11 @@ export class Sim {
     for (const a of e.auras) if (a.kind === 'tongues') m = Math.max(m, a.value);
     return m;
   }
-  private mobCanSwim(template: { family?: string; canSwim?: boolean } | undefined): boolean {
+  private mobCanSwim(template: { mobType?: string; canSwim?: boolean } | undefined): boolean {
     return !!template;
   }
-  private mobCanSpawnInWater(template: { family?: string; canSwim?: boolean } | undefined): boolean {
-    return !!template && (template.canSwim === true || template.family === 'murloc');
+  private mobCanSpawnInWater(template: { mobType?: string; canSwim?: boolean } | undefined): boolean {
+    return !!template && (template.canSwim === true || template.mobType === 'murloc');
   }
   private isControlAura(kind: AuraKind): boolean {
     return kind === 'stun' || kind === 'root' || kind === 'incapacitate' || kind === 'polymorph';
@@ -1915,13 +1899,15 @@ export class Sim {
   }
 
   private fleeMoveSpeed(e: Entity): number {
-    return Math.min(e.moveSpeed * FLEE_SPEED_MULT, FLEE_MAX_SPEED) * this.moveSpeedMult(e);
+    return effectiveFleeMoveSpeed(e.moveSpeed, this.moveSpeedMult(e));
   }
 
   private recoverFromFlee(mob: Entity, target: Entity, leash: number, leashAnchor: Vec3): void {
     mob.aiState = dist2d(mob.pos, target.pos) > MELEE_RANGE ? 'chase' : 'attack';
     mob.fleeTimer = 0;
-    if (dist2d(mob.pos, leashAnchor) >= leash - 1) mob.fleeReturnTimer = FLEE_RETURN_GRACE;
+    if (mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD) && dist2d(mob.pos, leashAnchor) >= leash - 1) {
+      mob.fleeReturnTimer = FLEE_RETURN_GRACE;
+    }
   }
 
   // Fiesta "Moon Boots" power-up: a buff_jump aura multiplies jump height.
@@ -2585,7 +2571,7 @@ export class Sim {
         }
         if (eff.type === 'polymorph') {
           if (target.kind === 'mob') {
-            const fam = MOBS[target.templateId]?.family;
+            const fam = MOBS[target.templateId]?.mobType;
             if (fam === 'undead' || target.templateId === 'gorrak') { this.error(p.id, 'This creature cannot be polymorphed.'); return; }
           } else if (target.kind !== 'player') {
             this.error(p.id, 'This creature cannot be polymorphed.');
@@ -3511,7 +3497,7 @@ export class Sim {
   private tameError(p: Entity, target: Entity): string | null {
     if (target.kind !== 'mob' || !target.hostile) return 'You cannot tame that.';
     const template = MOBS[target.templateId];
-    if (!template || (template.family !== 'beast' && template.family !== 'spider')) return 'Only beasts can be tamed.';
+    if (!template || (template.mobType !== 'animal' && template.mobType !== 'spider')) return 'Only beasts can be tamed.';
     if (template.elite || template.boss || template.rare) return 'That beast is too strong to tame.';
     if (target.level > p.level) return 'That beast is too high level for you to tame.';
     if (target.spawnPos.x > DUNGEON_X_THRESHOLD) return 'You cannot tame dungeon creatures.';
@@ -3846,7 +3832,7 @@ export class Sim {
   /** Tear-down for any pet: summoned demons vanish from the world; tamed beasts
    *  return to the wild and walk home. */
   private removePet(pet: Entity): void {
-    if (MOBS[pet.templateId]?.family === 'demon') this.despawnPet(pet);
+    if (MOBS[pet.templateId]?.mobType === 'demon') this.despawnPet(pet);
     else this.releasePetToWild(pet);
   }
 
@@ -4376,7 +4362,7 @@ export class Sim {
         e.inCombat = false;
         this.emit({ type: 'log', text: `${e.name} dies.`, color: '#f66', pid: e.ownerId });
         // a slain summoned demon lingers only briefly, then unravels (updateMob)
-        if (MOBS[e.templateId]?.family === 'demon') e.corpseTimer = 3;
+        if (MOBS[e.templateId]?.mobType === 'demon') e.corpseTimer = 3;
         return; // owned pets drop no loot/credit; demons unravel, hunters revive or abandon
       }
       this.frenzyPackmates(e); // wild packmates fly into a frenzy when one falls
@@ -4877,55 +4863,61 @@ export class Sim {
     return true;
   }
 
-  private usesProfiledMobCombat(mob: Entity): boolean {
-    const profile = this.mobCombatProfile(mob);
-    return profile.swingWhilePursuing || profile.immediateSwingOnEnterRange || !profile.canLeash;
+  private resetMobCombat(mob: Entity): void {
+    mob.aiState = 'evade';
+    mob.aggroTargetId = null;
+    mob.pursuitStallTimer = 0;
+    clearThreat(mob);
+    mob.leashAnchor = null;
   }
 
-  private updateProfiledMobCombat(mob: Entity): void {
+  private mobShouldResetCombat(mob: Entity, target: Entity): boolean {
+    if (targetEscapedMobInstance(mob, target, DUNGEON_X_THRESHOLD, dungeonAt)) {
+      this.resetMobCombat(mob);
+      return true;
+    }
+    if (!mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD)) return false;
+    const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
+    if (mob.fleeReturnTimer > 0) {
+      mob.fleeReturnTimer = Math.max(0, mob.fleeReturnTimer - DT);
+      if (dist2d(mob.pos, leashAnchor) <= WORLD_LEASH_DISTANCE - 1) mob.fleeReturnTimer = 0;
+    }
+    if (exceededWorldLeash(mob, leashAnchor) && mob.fleeReturnTimer <= 0) {
+      this.resetMobCombat(mob);
+      return true;
+    }
+    return false;
+  }
+
+  private updateMobMeleePursuit(mob: Entity, target: Entity): void {
     const profile = this.mobCombatProfile(mob);
-    this.updateMobTarget(mob);
-    const target = mob.aggroTargetId !== null ? this.entities.get(mob.aggroTargetId) : null;
-    if (!target || target.dead) {
-      this.retargetMob(mob);
-      return;
-    }
-    if (this.maybeFlee(mob, target)) return;
-
-    if (profile.canLeash) {
-      const leash = mob.spawnPos.x > DUNGEON_X_THRESHOLD ? DUNGEON_LEASH_DISTANCE : LEASH_DISTANCE;
-      const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
-      if (mob.fleeReturnTimer > 0) {
-        mob.fleeReturnTimer = Math.max(0, mob.fleeReturnTimer - DT);
-        if (dist2d(mob.pos, leashAnchor) <= leash - 1) mob.fleeReturnTimer = 0;
-      }
-      if (dist2d(mob.pos, leashAnchor) > leash && mob.fleeReturnTimer <= 0) {
-        mob.aiState = 'evade';
-        mob.aggroTargetId = null;
-        clearThreat(mob);
-        mob.leashAnchor = null;
-        return;
-      }
-    }
-
     mob.swingTimer = Math.max(0, mob.swingTimer - DT);
-    if (profile.swingWhilePursuing || mob.aiState === 'attack') {
-      this.tryMobMeleeSwingInRange(mob, target);
-    }
+    this.tryMobMeleeSwingInRange(mob, target);
 
     if (dist2d(mob.pos, target.pos) > profile.desiredRange) {
       if (!this.isRooted(mob)) {
+        const before = dist2d(mob.pos, target.pos);
         this.moveToward(mob, target.pos, mob.moveSpeed * profile.chaseSpeedMult * this.moveSpeedMult(mob));
+        const after = dist2d(mob.pos, target.pos);
+        if (after >= before - 1e-3) {
+          mob.pursuitStallTimer += DT;
+          if (mob.pursuitStallTimer >= PURSUIT_STALL_TIMEOUT) {
+            this.resetMobCombat(mob);
+            return;
+          }
+        } else {
+          mob.pursuitStallTimer = 0;
+        }
       } else {
+        mob.pursuitStallTimer = 0;
         mob.facing = angleTo(mob.pos, target.pos);
       }
     } else {
+      mob.pursuitStallTimer = 0;
       mob.facing = angleTo(mob.pos, target.pos);
     }
 
-    if (profile.immediateSwingOnEnterRange || profile.swingWhilePursuing || mob.aiState === 'attack') {
-      this.tryMobMeleeSwingInRange(mob, target);
-    }
+    this.tryMobMeleeSwingInRange(mob, target);
     mob.aiState = dist2d(mob.pos, target.pos) <= profile.meleeRange ? 'attack' : 'chase';
   }
 
@@ -4937,11 +4929,10 @@ export class Sim {
     mob.leashAnchor = { ...mob.pos };
     addThreat(mob, target.id, 1); // seed the hate table so taunts/heals have a baseline
     if (social) {
-      const family = MOBS[mob.templateId]?.family;
-      const pullRadius = (family && SOCIAL_PULL_RADIUS[family]) ?? DEFAULT_SOCIAL_PULL_RADIUS;
+      const pullRadius = socialPullRadius(MOBS[mob.templateId]);
       this.grid.forEachInRadius(mob.pos.x, mob.pos.z, pullRadius, (m, d2) => {
         if (m.kind === 'mob' && m.id !== mob.id && !m.dead && m.hostile && m.aiState === 'idle' && m.ownerId === null
-          && m.templateId === mob.templateId && d2 < pullRadius * pullRadius) {
+          && sameAllegiance(mob, m) && d2 < pullRadius * pullRadius) {
           m.aiState = 'chase';
           m.aggroTargetId = target.id;
           m.inCombat = true;
@@ -4979,7 +4970,7 @@ export class Sim {
           { speaker: 'nythraxis', text: 'What have you done', delay: NYTHRAXIS_DIALOGUE_LINE_SECONDS },
         ]);
       }
-      if (mob.ownerId !== null && MOBS[mob.templateId]?.family !== 'demon') return;
+      if (mob.ownerId !== null && MOBS[mob.templateId]?.mobType !== 'demon') return;
       mob.corpseTimer -= DT;
       mob.respawnTimer -= DT;
       // Death Throes: a volatile corpse counts down its fuse, then detonates once.
@@ -4991,7 +4982,7 @@ export class Sim {
         }
       }
       // a slain summoned demon unravels rather than respawning into the wild
-      if (mob.ownerId !== null && MOBS[mob.templateId]?.family === 'demon') {
+      if (mob.ownerId !== null && MOBS[mob.templateId]?.mobType === 'demon') {
         if (mob.corpseTimer <= 0) this.despawnPet(mob);
         return;
       }
@@ -5086,20 +5077,22 @@ export class Sim {
           return;
         }
         const template = MOBS[mob.templateId];
-        let detected: Entity | null = null;
-        let detectedD = Infinity;
-        this.playerGrid.forEachInRadius(mob.pos.x, mob.pos.z, 25, (e, d2) => {
-          if (e.dead) return;
-          if (this.isTrivialTo(mob, e)) return;
-          let radius = Math.max(4, Math.min(20, template.aggroRadius + (mob.level - e.level) * 1.5));
-          // stealthed rogues are harder to detect, relative to observer level
-          if (e.auras.some((a) => a.kind === 'stealth')) radius = stealthDetectionRadius(mob, e, radius);
-          const d = Math.sqrt(d2);
-          if (d < radius && d < detectedD) { detected = e; detectedD = d; }
-        });
-        if (detected) {
-          this.aggroMob(mob, detected, true);
-          break;
+        if (mobAggression(template) === 'aggressive') {
+          let detected: Entity | null = null;
+          let detectedD = Infinity;
+          this.playerGrid.forEachInRadius(mob.pos.x, mob.pos.z, 25, (e, d2) => {
+            if (e.dead) return;
+            if (this.isTrivialTo(mob, e)) return;
+            let radius = Math.max(4, Math.min(20, template.aggroRadius + (mob.level - e.level) * 1.5));
+            // stealthed rogues are harder to detect, relative to observer level
+            if (e.auras.some((a) => a.kind === 'stealth')) radius = stealthDetectionRadius(mob, e, radius);
+            const d = Math.sqrt(d2);
+            if (d < radius && d < detectedD) { detected = e; detectedD = d; }
+          });
+          if (detected) {
+            this.aggroMob(mob, detected, true);
+            break;
+          }
         }
         mob.wanderTimer -= DT;
         if (mob.wanderTimer <= 0) {
@@ -5123,10 +5116,6 @@ export class Sim {
         break;
       }
       case 'chase': {
-        if (this.usesProfiledMobCombat(mob)) {
-          this.updateProfiledMobCombat(mob);
-          break;
-        }
         this.updateMobTarget(mob);
         const target = mob.aggroTargetId !== null ? this.entities.get(mob.aggroTargetId) : null;
         if (!target || target.dead) {
@@ -5134,44 +5123,23 @@ export class Sim {
           break;
         }
         if (this.maybeFlee(mob, target)) break;
+        if (this.mobShouldResetCombat(mob, target)) break;
         const spell = MOBS[mob.templateId]?.petSpell;
-        const leash = mob.spawnPos.x > DUNGEON_X_THRESHOLD ? DUNGEON_LEASH_DISTANCE : LEASH_DISTANCE;
-        const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
-        if (mob.fleeReturnTimer > 0) {
-          mob.fleeReturnTimer = Math.max(0, mob.fleeReturnTimer - DT);
-          if (dist2d(mob.pos, leashAnchor) <= leash - 1) mob.fleeReturnTimer = 0;
-        }
-        // Nythraxis is a raid boss: he never leashes/resets from being kited.
-        // Only a full wipe resets him (handled in updateNythraxisEncounter).
-        if (!isNythraxis && dist2d(mob.pos, leashAnchor) > leash && mob.fleeReturnTimer <= 0) {
-          mob.aiState = 'evade';
-          mob.aggroTargetId = null;
-          clearThreat(mob);
-          mob.leashAnchor = null;
-          break;
-        }
         const d = dist2d(mob.pos, target.pos);
         if (spell && d <= spell.range) {
           mob.aiState = 'attack';
           mob.swingTimer = Math.min(mob.swingTimer, 0.4);
           break;
         }
-        mob.swingTimer = Math.max(0, mob.swingTimer - DT);
-        if (this.tryMobMeleeSwingInRange(mob, target)) break;
-        if (!this.isRooted(mob)) this.moveToward(mob, target.pos, mob.moveSpeed * this.moveSpeedMult(mob));
-        else mob.facing = angleTo(mob.pos, target.pos);
-        if (this.tryMobMeleeSwingInRange(mob, target)) break;
+        this.updateMobMeleePursuit(mob, target);
         break;
       }
       case 'attack': {
-        if (this.usesProfiledMobCombat(mob)) {
-          this.updateProfiledMobCombat(mob);
-          break;
-        }
         this.updateMobTarget(mob);
         const target = mob.aggroTargetId !== null ? this.entities.get(mob.aggroTargetId) : null;
         if (!target || target.dead) { this.retargetMob(mob); break; }
         if (this.maybeFlee(mob, target)) break;
+        if (this.mobShouldResetCombat(mob, target)) break;
         const d = dist2d(mob.pos, target.pos);
         const spell = MOBS[mob.templateId]?.petSpell;
         if (spell) {
@@ -5179,13 +5147,7 @@ export class Sim {
           this.updateRangedPetAttack(mob, target, spell);
           break;
         }
-        if (d > this.mobEffectiveMeleeRange(mob, target)) { mob.aiState = 'chase'; break; }
-        mob.facing = angleTo(mob.pos, target.pos);
-        mob.swingTimer -= DT;
-        if (mob.swingTimer <= 0) {
-          this.mobSwing(mob, target);
-          mob.swingTimer = mob.weapon.speed * this.swingIntervalMult(mob);
-        }
+        this.updateMobMeleePursuit(mob, target);
         // Boss/miniboss pulse mechanic.
         const pulse = MOBS[mob.templateId]?.aoePulse;
         if (pulse) {
@@ -5283,20 +5245,21 @@ export class Sim {
       case 'flee': {
         const target = mob.aggroTargetId !== null ? this.entities.get(mob.aggroTargetId) : null;
         if (!target || target.dead) { this.retargetMob(mob); break; }
+        if (this.mobShouldResetCombat(mob, target)) break;
         const fleeSpeed = this.fleeMoveSpeed(mob);
-        // A panic flee should not be the thing that breaks leash and full-heals
-        // the mob. If it reaches the leash edge, it recovers and re-engages;
-        // normal chase/attack leash checks still handle genuine dragged pulls.
-        const leash = mob.spawnPos.x > DUNGEON_X_THRESHOLD ? DUNGEON_LEASH_DISTANCE : LEASH_DISTANCE;
+        // A panic flee should not be the thing that breaks a world leash and
+        // full-heals the mob. If it reaches the leash edge, it recovers and
+        // re-engages; instance mobs have no distance leash.
         const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
-        if (dist2d(mob.pos, leashAnchor) >= leash - fleeSpeed * DT) {
-          this.recoverFromFlee(mob, target, leash, leashAnchor);
+        if (mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD)
+          && dist2d(mob.pos, leashAnchor) >= WORLD_LEASH_DISTANCE - fleeSpeed * DT) {
+          this.recoverFromFlee(mob, target, WORLD_LEASH_DISTANCE, leashAnchor);
           break;
         }
         mob.fleeTimer -= DT;
         if (mob.fleeTimer <= 0) {
           // Recover nerve and turn to fight again; hasFled keeps it from re-fleeing.
-          this.recoverFromFlee(mob, target, leash, leashAnchor);
+          this.recoverFromFlee(mob, target, WORLD_LEASH_DISTANCE, leashAnchor);
           mob.swingTimer = Math.min(mob.swingTimer, 0.4);
           break;
         }
@@ -5343,6 +5306,7 @@ export class Sim {
     mob.inCombat = false;
     mob.tappedById = null;
     mob.leashAnchor = null;
+    mob.pursuitStallTimer = 0;
     mob.evadeStall = 0;
     mob.fleeTimer = 0;
     mob.fleeReturnTimer = 0;
@@ -5363,14 +5327,12 @@ export class Sim {
     if (mob.templateId === NYTHRAXIS_BOSS_ID) this.resetNythraxisEncounter(mob);
   }
 
-  // Cowardly mobs panic once per pull at low HP: turn and run from the attacker
-  // for a few seconds, rallying nearby same-family allies. Returns true if the mob
-  // entered (or is already in) the flee state so the caller can stop its turn.
+  // Authored flee behaviour: opted-in mobs panic once per pull at low HP, turn
+  // and run from the attacker, and rally nearby same-allegiance allies.
   private canFlee(mob: Entity): boolean {
     if (mob.hasFled || mob.enraged) return false;
     const tmpl = MOBS[mob.templateId];
-    if (!tmpl || tmpl.boss || tmpl.elite || tmpl.rare) return false;
-    return FLEEING_FAMILIES.has(tmpl.family);
+    return mobWillFlee(tmpl);
   }
 
   private maybeFlee(mob: Entity, target: Entity): boolean {
@@ -5384,14 +5346,13 @@ export class Sim {
     return true;
   }
 
-  // A fleeing mob shouts for aid: nearby idle same-family mobs join the fight,
+  // A fleeing mob shouts for aid: nearby idle same-allegiance mobs join the fight,
   // mirroring the social-pull seeding in aggroMob.
   private callForHelp(mob: Entity, target: Entity): void {
-    const family = MOBS[mob.templateId]?.family;
-    if (!family) return;
+    if (mob.allegiance === null) return;
     this.grid.forEachInRadius(mob.pos.x, mob.pos.z, FLEE_HELP_RADIUS, (m, d2) => {
       if (m.kind === 'mob' && m.id !== mob.id && !m.dead && m.hostile && m.aiState === 'idle' && m.ownerId === null
-        && MOBS[m.templateId]?.family === family && d2 < FLEE_HELP_RADIUS * FLEE_HELP_RADIUS) {
+        && sameAllegiance(mob, m) && d2 < FLEE_HELP_RADIUS * FLEE_HELP_RADIUS) {
         m.aiState = 'chase';
         m.aggroTargetId = target.id;
         m.inCombat = true;
@@ -6365,6 +6326,7 @@ export class Sim {
       mob.prevFacing = Math.PI;
     }
     mob.leashAnchor = null;
+    mob.pursuitStallTimer = 0;
     mob.evadeStall = 0;
     mob.fleeTimer = 0;
     mob.fleeReturnTimer = 0;
@@ -6929,6 +6891,8 @@ export class Sim {
       const add = createMob(this.nextId++, template, template.maxLevel, pos);
       add.spawnPos = { ...boss.spawnPos };
       add.tappedById = boss.tappedById;
+      add.dungeonId = boss.dungeonId;
+      add.allegiance = boss.allegiance;
       this.addEntity(add);
       boss.summonedIds.push(add.id);
       inst?.mobIds.push(add.id);
@@ -7217,6 +7181,8 @@ export class Sim {
       const add = createMob(this.nextId++, template, level, pos);
       add.spawnPos = { ...boss.spawnPos }; // leashes with the boss; stays dead in instances
       add.tappedById = boss.tappedById;
+      add.dungeonId = boss.dungeonId;
+      add.allegiance = boss.allegiance;
       this.addEntity(add);
       boss.summonedIds.push(add.id);
       inst?.mobIds.push(add.id);
@@ -10993,6 +10959,8 @@ export class Sim {
       const mob = createMob(this.nextId++, template, level, this.groundPos(origin.x + spawn.x, origin.z + spawn.z));
       mob.facing = Math.PI; // face the entrance
       mob.prevFacing = mob.facing;
+      mob.dungeonId = dungeon.id;
+      mob.allegiance = `instance:${dungeon.id}:${inst.slot}`;
       this.addEntity(mob);
       inst.mobIds.push(mob.id);
     }
@@ -11595,13 +11563,13 @@ export class Sim {
     const list = known.map((k) => `${k.def.name} (Rank ${k.rank})`).join(', ');
     return `Spellbook (${known.length}): ${list}.`;
   }
-  // Self-only readout of the player's active pet: name, level, beast family,
+  // Self-only readout of the player's active pet: name, level, mob type,
   // and current health. Reads live pet state via petOf() so it stays accurate
   // regardless of how the pet was acquired (tame, summon).
   private petReadout(owner: Entity): string {
     const pet = this.petOf(owner.id);
     if (!pet) return 'You do not have a pet.';
-    const family = MOBS[pet.templateId]?.family;
+    const family = MOBS[pet.templateId]?.mobType;
     const kind = family ? ` ${family}` : '';
     const pct = pet.maxHp > 0 ? Math.round((pet.hp / pet.maxHp) * 100) : 0;
     return `Your pet: ${pet.name} (level ${pet.level}${kind}) — HP ${pet.hp}/${pet.maxHp} (${pct}%).`;

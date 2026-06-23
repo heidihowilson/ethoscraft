@@ -77,11 +77,11 @@ describe('crestIdForEntity', () => {
   it('maps NPCs to the status emblem', () => {
     expect(crestIdForEntity('npc', undefined)).toBe('status_npc');
     // Family is irrelevant for NPCs.
-    expect(crestIdForEntity('npc', 'beast')).toBe('status_npc');
+    expect(crestIdForEntity('npc', 'animal')).toBe('status_npc');
   });
 
   it('maps mobs to their creature-family crest', () => {
-    expect(crestIdForEntity('mob', 'beast')).toBe('family_beast'); // the Wild Boar case
+    expect(crestIdForEntity('mob', 'animal')).toBe('family_beast'); // the Wild Boar case
     expect(crestIdForEntity('mob', 'undead')).toBe('family_undead');
   });
 

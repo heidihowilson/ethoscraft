@@ -10,7 +10,7 @@ describe('Voskar the Emberwing (rare elite dragonkin)', () => {
   it('is a rare elite dragonkin with classic rare-spawn flags', () => {
     const v = MOBS.voskar_emberwing;
     expect(v).toBeDefined();
-    expect(v.family).toBe('dragonkin');
+    expect(v.mobType).toBe('dragonkin');
     expect(v.rare).toBe(true);
     expect(v.elite).toBe(true);
     expect(v.ccImmune).toBe(true);

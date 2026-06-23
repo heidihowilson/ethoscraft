@@ -216,7 +216,7 @@ for (const mob of Object.values(MOBS)) {
       source_type: 'mob_drop',
       source_id: mob.id,
       source_name: mob.name,
-      source_detail: `${mob.family}, level ${mob.minLevel}-${mob.maxLevel}${mob.boss ? ', boss' : ''}${mob.elite ? ', elite' : ''}${mob.rare ? ', rare' : ''}`,
+      source_detail: `${mob.mobType}, level ${mob.minLevel}-${mob.maxLevel}${mob.boss ? ', boss' : ''}${mob.elite ? ', elite' : ''}${mob.rare ? ', rare' : ''}`,
       drop_rate: percent(entry.chance),
       drop_rate_decimal: entry.chance,
       roll_group: entry.rollGroup ?? '',

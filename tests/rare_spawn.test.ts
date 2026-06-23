@@ -13,7 +13,7 @@ describe('rare spawn: Captain Verlan', () => {
     expect(v).toBeTruthy();
     expect(v.rare).toBe(true);
     expect(v.elite).toBe(true);
-    expect(v.family).toBe('undead');
+    expect(v.mobType).toBe('undead');
     // tougher than the trash it rises among (Restless Bones)
     expect(v.hpBase).toBeGreaterThan(MOBS['restless_bones'].hpBase);
     expect(v.respawnMult).toBeGreaterThan(1); // rares come back slowly

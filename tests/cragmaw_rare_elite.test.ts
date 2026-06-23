@@ -8,7 +8,7 @@ describe('Old Cragmaw — rare elite ridge beast (Thornpeak Heights)', () => {
     const m = MOBS.old_cragmaw;
     expect(m).toBeTruthy();
     expect(m.name).toBe('Old Cragmaw');
-    expect(m.family).toBe('beast');
+    expect(m.mobType).toBe('animal');
     expect(m.rare).toBe(true);
     expect(m.elite).toBe(true);
     expect(m.minLevel).toBe(14);

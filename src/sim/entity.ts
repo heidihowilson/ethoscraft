@@ -22,8 +22,8 @@ function baseEntity(id: number, pos: Vec3): Entity {
     chargeTargetId: null, chargeTimeLeft: 0, chargePath: [], followTargetId: null,
     sitting: false, eating: null, drinking: null,
     aiState: 'idle', tappedById: null, pulseTimer: 0, stompTimer: 0, stoneskinTimer: 0, terrifyTimer: 0, detonateTimer: Infinity, mendTimer: 0, wardTimer: 0, rallyTimer: 0, warcryTimer: 0, firedSummons: 0, summonedIds: [], enraged: false, healedThisPull: false,
-    threat: new Map(), forcedTargetId: null, forcedTargetTimer: 0, ownerId: null, petMode: 'defensive', petTauntTimer: 0, petPath: [], petPathCooldown: 0,
-    spawnPos: { ...pos }, leashAnchor: null, evadeStall: 0, fleeTimer: 0, fleeReturnTimer: 0, hasFled: false, wanderTarget: null, wanderTimer: 0,
+    threat: new Map(), forcedTargetId: null, forcedTargetTimer: 0, ownerId: null, allegiance: null, petMode: 'defensive', petTauntTimer: 0, petPath: [], petPathCooldown: 0,
+    spawnPos: { ...pos }, leashAnchor: null, pursuitStallTimer: 0, evadeStall: 0, fleeTimer: 0, fleeReturnTimer: 0, hasFled: false, wanderTarget: null, wanderTimer: 0,
     aggroTargetId: null, respawnTimer: 0, corpseTimer: 0, lootable: false, loot: null,
     xpValue: 0, questIds: [], vendorItems: [], objectItemId: null, dungeonId: null,
     dead: false, scale: 1, color: 0xffffff, skinCatalog: 'class', skin: 0, guild: '',
@@ -202,6 +202,7 @@ export function createMob(id: number, template: MobTemplate, level: number, pos:
   // so a level-1 mob gets 0 and each level adds armorPerLevel.
   e.stats.armor = Math.round(template.armorPerLevel * (level - 1));
   e.moveSpeed = template.moveSpeed;
+  e.allegiance = template.allegiance ?? null;
   e.scale = template.scale;
   e.color = template.color;
   e.swingTimer = 0;

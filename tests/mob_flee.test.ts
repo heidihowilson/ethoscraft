@@ -1,8 +1,8 @@
-// Cowardly mobs (sentient families: humanoid/kobold/murloc/troll) panic at low HP
-// instead of fighting to the death: they turn and run from their attacker for a few
-// seconds, rallying nearby same-family allies, then recover their nerve. They flee
-// only ONCE per pull, and elites/bosses/beasts never flee.
+// Fleeing is authored per mob/situation. A fleeing mob panics at low HP instead
+// of fighting to the death: it runs from its attacker for a few seconds, rallies
+// nearby same-allegiance allies, then recovers its nerve. It flees only once per pull.
 import { describe, expect, it } from 'vitest';
+import { MOBS } from '../src/sim/data';
 import { Sim } from '../src/sim/sim';
 import { DT, RUN_SPEED, dist2d } from '../src/sim/types';
 import type { Entity } from '../src/sim/types';
@@ -15,9 +15,10 @@ function wildMobs(sim: Sim): Entity[] {
   return [...sim.entities.values()].filter((e) => e.kind === 'mob' && !e.dead && e.ownerId === null);
 }
 
-// Put a wild mob into an active fight with the player at low HP, as a chosen family.
+// Put a wild mob into an active fight with the player at low HP, as a chosen template.
 function engageLowHp(sim: Sim, mob: Entity, templateId: string, hpFrac: number) {
   mob.templateId = templateId;
+  mob.allegiance = MOBS[templateId]?.allegiance ?? null;
   mob.hostile = true;
   mob.maxHp = 1000;
   mob.hp = Math.round(mob.maxHp * hpFrac);
@@ -46,8 +47,8 @@ function moveEntityToward(e: Entity, target: Entity, step: number) {
   e.prevPos = { ...e.pos };
 }
 
-describe('cowardly mobs flee at low HP', () => {
-  it('a low-HP humanoid panics and enters the flee state', () => {
+describe('willFlee mobs flee at low HP', () => {
+  it('a low-HP willFlee mob panics and enters the flee state', () => {
     const sim = makeSim();
     const mob = wildMobs(sim)[0];
     engageLowHp(sim, mob, 'gravecaller_cultist', 0.15);
@@ -58,7 +59,7 @@ describe('cowardly mobs flee at low HP', () => {
     expect(mob.hasFled).toBe(true);
   });
 
-  it('a healthy humanoid stands and fights (no flee above the threshold)', () => {
+  it('a healthy willFlee mob stands and fights above the threshold', () => {
     const sim = makeSim();
     const mob = wildMobs(sim)[0];
     engageLowHp(sim, mob, 'gravecaller_cultist', 0.5);
@@ -80,7 +81,7 @@ describe('cowardly mobs flee at low HP', () => {
     expect(dist2d(mob.pos, sim.player.pos)).toBeGreaterThan(before);
   });
 
-  it('does not flee faster than a player can run', () => {
+  it('does not flee faster than 90% of normal player run speed', () => {
     const sim = makeSim();
     const mob = wildMobs(sim)[0];
     engageLowHp(sim, mob, 'gravecaller_cultist', 0.1);
@@ -92,7 +93,7 @@ describe('cowardly mobs flee at low HP', () => {
 
     sim.tick();
 
-    expect(dist2d(before, mob.pos)).toBeLessThanOrEqual(RUN_SPEED * DT + 1e-6);
+    expect(dist2d(before, mob.pos)).toBeLessThanOrEqual(RUN_SPEED * 0.9 * DT + 1e-6);
   });
 
   it('stays in the pull instead of evade-resetting when the player chases a fleeing mob', () => {
@@ -137,14 +138,16 @@ describe('cowardly mobs flee at low HP', () => {
     expect(mob.hp).toBeLessThan(mob.maxHp);
   });
 
-  it('calls a nearby same-family ally into the fight when it flees', () => {
+  it('calls a nearby same-allegiance ally into the fight when it flees', () => {
     const sim = makeSim();
     const mobs = wildMobs(sim);
     const fleer = mobs[0];
     const ally = mobs.find((m) => m.id !== fleer.id)!;
     engageLowHp(sim, fleer, 'gravecaller_cultist', 0.12);
-    // an idle same-family ally standing right next to the fleer
-    ally.templateId = 'gravecaller_cultist';
+    // an idle ally in the same faction standing right next to the fleer
+    ally.templateId = 'forest_wolf';
+    fleer.allegiance = 'gravecaller_cult';
+    ally.allegiance = 'gravecaller_cult';
     ally.hostile = true;
     ally.dead = false;
     ally.aiState = 'idle';
@@ -156,6 +159,31 @@ describe('cowardly mobs flee at low HP', () => {
 
     expect(sim.entities.get(ally.id)!.aggroTargetId).toBe(sim.playerId);
     expect(sim.entities.get(ally.id)!.aiState).toBe('chase');
+  });
+
+  it('does not call unaffiliated or different-allegiance mobs for help', () => {
+    const sim = makeSim();
+    const mobs = wildMobs(sim);
+    const fleer = mobs[0];
+    const bystander = mobs.find((m) => m.id !== fleer.id)!;
+    const previousAggression = MOBS.forest_wolf.aggression;
+    MOBS.forest_wolf.aggression = 'neutral';
+    engageLowHp(sim, fleer, 'gravecaller_cultist', 0.12);
+    fleer.allegiance = 'gravecaller_cult';
+    bystander.templateId = 'forest_wolf';
+    bystander.allegiance = null;
+    bystander.hostile = true;
+    bystander.dead = false;
+    bystander.aiState = 'idle';
+    bystander.aggroTargetId = null;
+    bystander.pos = { x: fleer.pos.x + 2, z: fleer.pos.z, y: fleer.pos.y };
+    bystander.prevPos = { ...bystander.pos };
+
+    sim.tick();
+
+    expect(sim.entities.get(bystander.id)!.aggroTargetId).toBeNull();
+    expect(sim.entities.get(bystander.id)!.aiState).toBe('idle');
+    MOBS.forest_wolf.aggression = previousAggression;
   });
 
   it('recovers its nerve after the flee window and re-engages', () => {
@@ -192,8 +220,8 @@ describe('cowardly mobs flee at low HP', () => {
   });
 });
 
-describe('brave mobs never flee', () => {
-  it('a low-HP beast fights to the death', () => {
+describe('willFlee false mobs never flee', () => {
+  it('a low-HP willFlee false mob fights to the death', () => {
     const sim = makeSim();
     const mob = wildMobs(sim)[0];
     engageLowHp(sim, mob, 'forest_wolf', 0.05);
@@ -203,13 +231,53 @@ describe('brave mobs never flee', () => {
     expect(sim.entities.get(mob.id)!.aiState).not.toBe('flee');
   });
 
-  it('an elite humanoid does not flee', () => {
+  it('an elite mob can still flee when the template explicitly opts in', () => {
     const sim = makeSim();
     const mob = wildMobs(sim)[0];
+    const previous = MOBS.tidebound_acolyte.willFlee;
+    const previousHeal = MOBS.tidebound_acolyte.desperateHeal;
+    MOBS.tidebound_acolyte.willFlee = true;
+    MOBS.tidebound_acolyte.desperateHeal = undefined;
     engageLowHp(sim, mob, 'tidebound_acolyte', 0.05); // humanoid, elite
 
     sim.tick();
 
-    expect(sim.entities.get(mob.id)!.aiState).not.toBe('flee');
+    expect(sim.entities.get(mob.id)!.aiState).toBe('flee');
+    MOBS.tidebound_acolyte.willFlee = previous;
+    MOBS.tidebound_acolyte.desperateHeal = previousHeal;
+  });
+});
+
+describe('mob aggression', () => {
+  it('neutral mobs do not proximity aggro', () => {
+    const sim = makeSim();
+    const mob = wildMobs(sim)[0];
+    const previous = MOBS.forest_wolf.aggression;
+    MOBS.forest_wolf.aggression = 'neutral';
+    mob.templateId = 'forest_wolf';
+    mob.pos = { x: sim.player.pos.x + 1, z: sim.player.pos.z, y: sim.player.pos.y };
+    mob.prevPos = { ...mob.pos };
+
+    sim.tick();
+
+    expect(mob.aiState).toBe('idle');
+    expect(mob.aggroTargetId).toBeNull();
+    MOBS.forest_wolf.aggression = previous;
+  });
+
+  it('aggressive mobs proximity aggro', () => {
+    const sim = makeSim();
+    const mob = wildMobs(sim)[0];
+    const previous = MOBS.forest_wolf.aggression;
+    MOBS.forest_wolf.aggression = 'aggressive';
+    mob.templateId = 'forest_wolf';
+    mob.pos = { x: sim.player.pos.x + 1, z: sim.player.pos.z, y: sim.player.pos.y };
+    mob.prevPos = { ...mob.pos };
+
+    sim.tick();
+
+    expect(mob.aiState).toBe('chase');
+    expect(mob.aggroTargetId).toBe(sim.playerId);
+    MOBS.forest_wolf.aggression = previous;
   });
 });

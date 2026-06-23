@@ -29,7 +29,7 @@ export const MOONGATE_POS = { x: -70, z: 792 };
 
 export const TEMPLE_MOBS: Record<string, MobTemplate> = {
   glimmermere_wader: {
-    id: 'glimmermere_wader', name: 'Glimmermere Wader', minLevel: 15, maxLevel: 16, family: 'murloc',
+    id: 'glimmermere_wader', name: 'Glimmermere Wader', minLevel: 15, maxLevel: 16, mobType: 'murloc',
     hpBase: 70, hpPerLevel: 22, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 1.9,
     armorPerLevel: 14, moveSpeed: 8, aggroRadius: 13, // waders swarm in from far, murloc-style
     loot: [
@@ -40,7 +40,7 @@ export const TEMPLE_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0x8fb6c4,
   },
   drowned_votary: {
-    id: 'drowned_votary', name: 'Drowned Votary', minLevel: 15, maxLevel: 16, family: 'undead',
+    id: 'drowned_votary', name: 'Drowned Votary', minLevel: 15, maxLevel: 16, mobType: 'undead',
     hpBase: 74, hpPerLevel: 22, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 2.0,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 11,
     loot: [
@@ -51,7 +51,7 @@ export const TEMPLE_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x6c8f8a,
   },
   sethrael_palecoil: {
-    id: 'sethrael_palecoil', name: 'Sethrael the Palecoil', minLevel: 16, maxLevel: 16, family: 'dragonkin', rare: true,
+    id: 'sethrael_palecoil', name: 'Sethrael the Palecoil', minLevel: 16, maxLevel: 16, mobType: 'dragonkin', rare: true,
     hpBase: 175, hpPerLevel: 28, dmgBase: 13, dmgPerLevel: 2.8, attackSpeed: 2.2,
     armorPerLevel: 22, moveSpeed: 7.5, aggroRadius: 12,
     loot: [
@@ -70,49 +70,49 @@ export const TEMPLE_MOBS: Record<string, MobTemplate> = {
 
 export const TEMPLE_DUNGEON_MOBS: Record<string, MobTemplate> = {
   drowned_templeguard: {
-    id: 'drowned_templeguard', name: 'Drowned Templeguard', minLevel: 16, maxLevel: 17, family: 'undead', elite: true,
+    id: 'drowned_templeguard', name: 'Drowned Templeguard', minLevel: 16, maxLevel: 17, mobType: 'undead', elite: true,
     hpBase: 58, hpPerLevel: 22, dmgBase: 11, dmgPerLevel: 2.6, attackSpeed: 2.3,
     armorPerLevel: 20, moveSpeed: 6.5, aggroRadius: 12,
     loot: [{ copper: 200, chance: 1 }, { itemId: 'bone_fragments', chance: 0.6 }, { itemId: 'pale_pearl', chance: 0.4 }],
     scale: 1.1, color: 0x88a7a0,
   },
   pale_choir_acolyte: {
-    id: 'pale_choir_acolyte', name: 'Pale Choir Acolyte', minLevel: 16, maxLevel: 17, family: 'humanoid', elite: true,
+    id: 'pale_choir_acolyte', name: 'Pale Choir Acolyte', minLevel: 16, maxLevel: 17, mobType: 'humanoid', elite: true,
     hpBase: 54, hpPerLevel: 21, dmgBase: 11, dmgPerLevel: 2.6, attackSpeed: 2.0,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 12,
     loot: [{ copper: 220, chance: 1 }, { itemId: 'linen_scrap', chance: 0.4 }, { itemId: 'briny_idol', chance: 0.3 }],
     scale: 1.0, color: 0x9fb8d6,
   },
   glimmerscale_lurker: {
-    id: 'glimmerscale_lurker', name: 'Glimmerscale Lurker', minLevel: 16, maxLevel: 17, family: 'spider', elite: true,
+    id: 'glimmerscale_lurker', name: 'Glimmerscale Lurker', minLevel: 16, maxLevel: 17, mobType: 'spider', elite: true,
     hpBase: 56, hpPerLevel: 21, dmgBase: 11, dmgPerLevel: 2.7, attackSpeed: 1.8,
     armorPerLevel: 16, moveSpeed: 8, aggroRadius: 13,
     loot: [{ copper: 200, chance: 1 }, { itemId: 'spider_leg', chance: 0.5 }, { itemId: 'moonpale_scale', chance: 0.4 }],
     scale: 1.2, color: 0xbfe1ec,
   },
   pearlguard_sentinel: {
-    id: 'pearlguard_sentinel', name: 'Pearlguard Sentinel', minLevel: 17, maxLevel: 18, family: 'elemental', elite: true,
+    id: 'pearlguard_sentinel', name: 'Pearlguard Sentinel', minLevel: 17, maxLevel: 18, mobType: 'elemental', elite: true,
     hpBase: 64, hpPerLevel: 23, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.2,
     armorPerLevel: 22, moveSpeed: 6.5, aggroRadius: 12,
     loot: [{ copper: 260, chance: 1 }, { itemId: 'pale_pearl', chance: 0.6 }, { itemId: 'moonpale_scale', chance: 0.4 }],
     scale: 1.15, color: 0x9fc6e0,
   },
   choirmother_selthe: {
-    id: 'choirmother_selthe', name: 'Choirmother Selthe', minLevel: 18, maxLevel: 18, family: 'humanoid', elite: true,
+    id: 'choirmother_selthe', name: 'Choirmother Selthe', minLevel: 18, maxLevel: 18, mobType: 'humanoid', elite: true,
     hpBase: 150, hpPerLevel: 26, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.2,
     armorPerLevel: 22, moveSpeed: 7, aggroRadius: 14,
     loot: [{ copper: 700, chance: 1 }, { itemId: 'selthes_seastriders', chance: 0.4 }, { itemId: 'briny_idol', chance: 0.5 }],
     scale: 1.15, color: 0x6f8fae,
   },
   moonspawn: {
-    id: 'moonspawn', name: 'Moonspawn', minLevel: 16, maxLevel: 16, family: 'murloc',
+    id: 'moonspawn', name: 'Moonspawn', minLevel: 16, maxLevel: 16, mobType: 'murloc',
     hpBase: 44, hpPerLevel: 15, dmgBase: 8, dmgPerLevel: 2.1, attackSpeed: 1.9,
     armorPerLevel: 10, moveSpeed: 8, aggroRadius: 12,
     loot: [], // summoned by Ysolei — nothing to loot
     scale: 0.9, color: 0xcfe0ff,
   },
   ysolei: {
-    id: 'ysolei', name: 'Ysolei, Avatar of the Drowned Moon', minLevel: 18, maxLevel: 18, family: 'dragonkin',
+    id: 'ysolei', name: 'Ysolei, Avatar of the Drowned Moon', minLevel: 18, maxLevel: 18, mobType: 'dragonkin',
     elite: true, boss: true,
     hpBase: 300, hpPerLevel: 38, dmgBase: 14, dmgPerLevel: 2.9, attackSpeed: 2.5,
     armorPerLevel: 28, moveSpeed: 7, aggroRadius: 18,
