@@ -11,8 +11,7 @@ import { PLAYER_BODY_RADIUS, PLAYER_MAX_CLIMB_SLOPE, PLAYER_SWIM_DEPTH, findPlay
 import { combatProfileForMob, effectiveMobMeleeRange, type MobCombatProfile } from './mob_combat';
 import {
   FLEE_DURATION, FLEE_HELP_RADIUS, FLEE_HP_THRESHOLD, FLEE_RETURN_GRACE,
-  WORLD_LEASH_DISTANCE, effectiveFleeMoveSpeed, exceededWorldLeash, mobAggression, mobCanDistanceLeash,
-  mobWillFlee, sameAllegiance, socialPullRadius, targetEscapedMobInstance,
+  WORLD_LEASH_DISTANCE, MobRuntime, leashPolicyForMob, sameAllegiance, socialPullRadius,
 } from './mob_behavior';
 import { createGroundObject, createMob, createNpc, createPlayer, recalcPlayerStats, PlayerEquipment } from './entity';
 import { canEquipItem } from './equipment_rules';
@@ -1899,13 +1898,14 @@ export class Sim {
   }
 
   private fleeMoveSpeed(e: Entity): number {
-    return effectiveFleeMoveSpeed(e.moveSpeed, this.moveSpeedMult(e));
+    return new MobRuntime(e, MOBS[e.templateId]).fleeMoveSpeed(this.moveSpeedMult(e));
   }
 
   private recoverFromFlee(mob: Entity, target: Entity, leash: number, leashAnchor: Vec3): void {
     mob.aiState = dist2d(mob.pos, target.pos) > MELEE_RANGE ? 'chase' : 'attack';
     mob.fleeTimer = 0;
-    if (mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD) && dist2d(mob.pos, leashAnchor) >= leash - 1) {
+    if (new MobRuntime(mob, MOBS[mob.templateId]).canDistanceLeash(DUNGEON_X_THRESHOLD)
+      && dist2d(mob.pos, leashAnchor) >= leash - 1) {
       mob.fleeReturnTimer = FLEE_RETURN_GRACE;
     }
   }
@@ -4872,17 +4872,21 @@ export class Sim {
   }
 
   private mobShouldResetCombat(mob: Entity, target: Entity): boolean {
-    if (targetEscapedMobInstance(mob, target, DUNGEON_X_THRESHOLD, dungeonAt)) {
-      this.resetMobCombat(mob);
-      return true;
-    }
-    if (!mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD)) return false;
+    const runtime = new MobRuntime(mob, MOBS[mob.templateId]);
+    const policy = leashPolicyForMob(mob, DUNGEON_X_THRESHOLD, dungeonAt);
     const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
+    if (!runtime.canDistanceLeash(DUNGEON_X_THRESHOLD)) {
+      if (policy.shouldReset(runtime, target, leashAnchor)) {
+        this.resetMobCombat(mob);
+        return true;
+      }
+      return false;
+    }
     if (mob.fleeReturnTimer > 0) {
       mob.fleeReturnTimer = Math.max(0, mob.fleeReturnTimer - DT);
       if (dist2d(mob.pos, leashAnchor) <= WORLD_LEASH_DISTANCE - 1) mob.fleeReturnTimer = 0;
     }
-    if (exceededWorldLeash(mob, leashAnchor) && mob.fleeReturnTimer <= 0) {
+    if (policy.shouldReset(runtime, target, leashAnchor) && mob.fleeReturnTimer <= 0) {
       this.resetMobCombat(mob);
       return true;
     }
@@ -5077,7 +5081,7 @@ export class Sim {
           return;
         }
         const template = MOBS[mob.templateId];
-        if (mobAggression(template) === 'aggressive') {
+        if (new MobRuntime(mob, template).aggression === 'aggressive') {
           let detected: Entity | null = null;
           let detectedD = Infinity;
           this.playerGrid.forEachInRadius(mob.pos.x, mob.pos.z, 25, (e, d2) => {
@@ -5251,7 +5255,7 @@ export class Sim {
         // full-heals the mob. If it reaches the leash edge, it recovers and
         // re-engages; instance mobs have no distance leash.
         const leashAnchor = mob.leashAnchor ?? mob.spawnPos;
-        if (mobCanDistanceLeash(mob, DUNGEON_X_THRESHOLD)
+        if (new MobRuntime(mob, MOBS[mob.templateId]).canDistanceLeash(DUNGEON_X_THRESHOLD)
           && dist2d(mob.pos, leashAnchor) >= WORLD_LEASH_DISTANCE - fleeSpeed * DT) {
           this.recoverFromFlee(mob, target, WORLD_LEASH_DISTANCE, leashAnchor);
           break;
@@ -5332,7 +5336,7 @@ export class Sim {
   private canFlee(mob: Entity): boolean {
     if (mob.hasFled || mob.enraged) return false;
     const tmpl = MOBS[mob.templateId];
-    return mobWillFlee(tmpl);
+    return new MobRuntime(mob, tmpl).willFlee;
   }
 
   private maybeFlee(mob: Entity, target: Entity): boolean {
