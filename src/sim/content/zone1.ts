@@ -41,7 +41,7 @@ export const ZONE1_ZONE: ZoneDef = {
 
 export const ZONE1_MOBS: Record<string, MobTemplate> = {
   warlock_imp: {
-    id: 'warlock_imp', name: 'Fire Demon', minLevel: 1, maxLevel: 20, mobType: 'demon',
+    id: 'warlock_imp', name: 'Fire Demon', minLevel: 1, maxLevel: 20, type: 'demon',
     hpBase: 24, hpPerLevel: 11, dmgBase: 2, dmgPerLevel: 0.7, attackSpeed: 2.0,
     armorPerLevel: 5, moveSpeed: 8, aggroRadius: 0,
     loot: [],
@@ -50,7 +50,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     petSpell: { name: 'Firebolt', school: 'fire', min: 8, max: 11, range: 24, every: 2.0 },
   },
   warlock_voidwalker: {
-    id: 'warlock_voidwalker', name: 'Void Demon', minLevel: 10, maxLevel: 20, mobType: 'demon',
+    id: 'warlock_voidwalker', name: 'Void Demon', minLevel: 10, maxLevel: 20, type: 'demon',
     hpBase: 95, hpPerLevel: 24, dmgBase: 3, dmgPerLevel: 1.0, attackSpeed: 2.4,
     armorPerLevel: 28, moveSpeed: 7.2, aggroRadius: 0,
     loot: [],
@@ -58,7 +58,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     petRole: 'melee_tank',
   },
   forest_wolf: {
-    id: 'forest_wolf', name: 'Forest Wolf', minLevel: 1, maxLevel: 2, mobType: 'animal',
+    id: 'forest_wolf', name: 'Forest Wolf', minLevel: 1, maxLevel: 2, type: 'beast',
     willFlee: false,
     hpBase: 28, hpPerLevel: 14, dmgBase: 3, dmgPerLevel: 1.6, attackSpeed: 2.0,
     armorPerLevel: 10, moveSpeed: 8, aggroRadius: 10,
@@ -71,7 +71,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     packFrenzy: { radius: 12, hasteMult: 1.3, duration: 8 },
   },
   old_greyjaw: {
-    id: 'old_greyjaw', name: 'Old Greyjaw', minLevel: 4, maxLevel: 4, mobType: 'animal', rare: true,
+    id: 'old_greyjaw', name: 'Old Greyjaw', minLevel: 4, maxLevel: 4, type: 'beast', rare: true,
     hpBase: 110, hpPerLevel: 20, dmgBase: 5, dmgPerLevel: 2.0, attackSpeed: 1.8,
     armorPerLevel: 16, moveSpeed: 8.5, aggroRadius: 12,
     // The old wolf turns savage as the fight wears on: each wound it takes can
@@ -85,7 +85,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.25, color: 0x566061,
   },
   wild_boar: {
-    id: 'wild_boar', name: 'Wild Boar', minLevel: 2, maxLevel: 3, mobType: 'animal',
+    id: 'wild_boar', name: 'Wild Boar', minLevel: 2, maxLevel: 3, type: 'beast',
     hpBase: 34, hpPerLevel: 16, dmgBase: 4, dmgPerLevel: 1.8, attackSpeed: 2.2,
     armorPerLevel: 14, moveSpeed: 7.5, aggroRadius: 9,
     // Stiff bristles prick anyone who melees the boar.
@@ -99,7 +99,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.85, color: 0x935116,
   },
   elder_bristleback: {
-    id: 'elder_bristleback', name: 'Elder Bristleback', minLevel: 5, maxLevel: 5, mobType: 'animal', rare: true,
+    id: 'elder_bristleback', name: 'Elder Bristleback', minLevel: 5, maxLevel: 5, type: 'beast', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 7.2,
     hpBase: 260, hpPerLevel: 52, dmgBase: 11, dmgPerLevel: 3.3, attackSpeed: 2.4,
     armorPerLevel: 30, moveSpeed: 7.2, aggroRadius: 12,
@@ -120,7 +120,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.2, color: 0x7b3f13,
   },
   webwood_spider: {
-    id: 'webwood_spider', name: 'Webwood Lurker', minLevel: 2, maxLevel: 4, mobType: 'spider',
+    id: 'webwood_spider', name: 'Webwood Lurker', minLevel: 2, maxLevel: 4, type: 'spider',
     hpBase: 30, hpPerLevel: 15, dmgBase: 4, dmgPerLevel: 1.7, attackSpeed: 1.8,
     armorPerLevel: 8, moveSpeed: 8, aggroRadius: 10,
     venom: { chance: 0.35, perTick: 2, interval: 2, duration: 10, name: 'Spider Venom', school: 'nature' },
@@ -133,7 +133,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.9, color: 0x4a235a,
   },
   sableweb_matriarch: {
-    id: 'sableweb_matriarch', name: 'Sableweb Matriarch', minLevel: 6, maxLevel: 6, mobType: 'spider', rare: true,
+    id: 'sableweb_matriarch', name: 'Sableweb Matriarch', minLevel: 6, maxLevel: 6, type: 'spider', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 432,
     hpBase: 250, hpPerLevel: 50, dmgBase: 11, dmgPerLevel: 3.3, attackSpeed: 1.7,
     armorPerLevel: 20, moveSpeed: 8, aggroRadius: 12,
@@ -152,14 +152,14 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.15, color: 0x1b1025,
   },
   sableweb_hatchling: {
-    id: 'sableweb_hatchling', name: 'Sableweb Hatchling', minLevel: 5, maxLevel: 5, mobType: 'spider',
+    id: 'sableweb_hatchling', name: 'Sableweb Hatchling', minLevel: 5, maxLevel: 5, type: 'spider',
     hpBase: 34, hpPerLevel: 13, dmgBase: 5, dmgPerLevel: 1.8, attackSpeed: 1.6,
     armorPerLevel: 8, moveSpeed: 8.5, aggroRadius: 12,
     loot: [],
     scale: 0.65, color: 0x21112d,
   },
   mogger: {
-    id: 'mogger', name: 'Mogger', minLevel: 6, maxLevel: 6, mobType: 'humanoid', rare: true,
+    id: 'mogger', name: 'Mogger', minLevel: 6, maxLevel: 6, type: 'humanoid', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 4,
     hpBase: 300, hpPerLevel: 58, dmgBase: 12, dmgPerLevel: 3.5, attackSpeed: 2.2,
     armorPerLevel: 34, moveSpeed: 7.4, aggroRadius: 14,
@@ -177,7 +177,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.28, color: 0x8e5b33,
   },
   mogger_lackey: {
-    id: 'mogger_lackey', name: 'Mogger Lackey', minLevel: 5, maxLevel: 6, mobType: 'humanoid',
+    id: 'mogger_lackey', name: 'Mogger Lackey', minLevel: 5, maxLevel: 6, type: 'humanoid',
     hpBase: 44, hpPerLevel: 18, dmgBase: 6, dmgPerLevel: 2.0, attackSpeed: 2.0,
     armorPerLevel: 18, moveSpeed: 7.5, aggroRadius: 12,
     stunOnHit: { chance: 0.12, duration: 1, name: 'Skullthump', school: 'physical' },
@@ -185,7 +185,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.95, color: 0x7b4b2b,
   },
   mudfin_murloc: {
-    id: 'mudfin_murloc', name: 'Mudfin Skulker', minLevel: 3, maxLevel: 5, mobType: 'murloc',
+    id: 'mudfin_murloc', name: 'Mudfin Skulker', minLevel: 3, maxLevel: 5, type: 'murloc',
     hpBase: 36, hpPerLevel: 17, dmgBase: 5, dmgPerLevel: 1.9, attackSpeed: 1.9,
     armorPerLevel: 12, moveSpeed: 8, aggroRadius: 13, // murlocs aggro from far and bring friends
     loot: [
@@ -201,7 +201,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     polymorphHex: { chance: 0.12, duration: 4, name: 'Mudfin Hex', school: 'nature' },
   },
   tunnel_rat: {
-    id: 'tunnel_rat', name: 'Tunnel Rat Digger', minLevel: 4, maxLevel: 6, mobType: 'kobold',
+    id: 'tunnel_rat', name: 'Tunnel Rat Digger', minLevel: 4, maxLevel: 6, type: 'kobold',
     hpBase: 42, hpPerLevel: 18, dmgBase: 6, dmgPerLevel: 2.0, attackSpeed: 2.1,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 10,
     loot: [
@@ -214,7 +214,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.85, color: 0x9c640c,
   },
   grix_the_tunnelking: {
-    id: 'grix_the_tunnelking', name: 'Grix the Tunnelking', minLevel: 7, maxLevel: 7, mobType: 'kobold', rare: true,
+    id: 'grix_the_tunnelking', name: 'Grix the Tunnelking', minLevel: 7, maxLevel: 7, type: 'kobold', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 432,
     hpBase: 280, hpPerLevel: 52, dmgBase: 11, dmgPerLevel: 3.3, attackSpeed: 2.0,
     armorPerLevel: 24, moveSpeed: 7, aggroRadius: 13,
@@ -233,7 +233,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.15, color: 0xb9770e,
   },
   vale_bandit: {
-    id: 'vale_bandit', name: 'Vale Bandit', minLevel: 3, maxLevel: 5, mobType: 'humanoid',
+    id: 'vale_bandit', name: 'Vale Bandit', minLevel: 3, maxLevel: 5, type: 'humanoid',
     hpBase: 40, hpPerLevel: 18, dmgBase: 5, dmgPerLevel: 2.0, attackSpeed: 2.0,
     armorPerLevel: 20, moveSpeed: 7, aggroRadius: 11,
     loot: [
@@ -246,7 +246,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     blind: { chance: 0.25, miss: 0.3, duration: 5, name: 'Blinding Powder', school: 'physical' },
   },
   restless_bones: {
-    id: 'restless_bones', name: 'Restless Bones', minLevel: 5, maxLevel: 7, mobType: 'undead',
+    id: 'restless_bones', name: 'Restless Bones', minLevel: 5, maxLevel: 7, type: 'undead',
     hpBase: 46, hpPerLevel: 19, dmgBase: 7, dmgPerLevel: 2.1, attackSpeed: 2.3,
     armorPerLevel: 14, moveSpeed: 6.5, aggroRadius: 11,
     loot: [
@@ -266,7 +266,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     // (beast), Elder Bristleback (beast), Sableweb Matriarch (spider) and
     // Mogger (humanoid). A heavy, slow striker that erupts in a shadow nova
     // and goes berserk when low; loot mirrors the other rare elites.
-    id: 'captain_verlan', name: 'Captain Verlan', minLevel: 7, maxLevel: 7, mobType: 'undead', rare: true,
+    id: 'captain_verlan', name: 'Captain Verlan', minLevel: 7, maxLevel: 7, type: 'undead', rare: true,
     elite: true, ccImmune: true, respawnMult: 7.2,
     hpBase: 280, hpPerLevel: 56, dmgBase: 12, dmgPerLevel: 3.4, attackSpeed: 2.6,
     armorPerLevel: 32, moveSpeed: 7.4, aggroRadius: 13,
@@ -283,7 +283,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.26, color: 0x3b4a5a,
   },
   wraithbinder_maldrec: {
-    id: 'wraithbinder_maldrec', name: 'Wraithbinder Maldrec', minLevel: 7, maxLevel: 7, mobType: 'undead', rare: true,
+    id: 'wraithbinder_maldrec', name: 'Wraithbinder Maldrec', minLevel: 7, maxLevel: 7, type: 'undead', rare: true,
     elite: true, ccImmune: true, respawnMult: 432,
     hpBase: 320, hpPerLevel: 60, dmgBase: 12, dmgPerLevel: 3.4, attackSpeed: 2.3,
     armorPerLevel: 28, moveSpeed: 6.8, aggroRadius: 13,
@@ -306,10 +306,10 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
   // -------------------------------------------------------------------------
   // Brightwood Glade — a sunlit wildlife grove in the north of the Vale. Gentle
   // beasts for low-level hunters to tame and cull, watched over by a lone ranger,
-  // and crowned by a rare great stag. All mobType:'animal' so hunters can tame them.
+  // and crowned by a rare great stag. All type:'beast' so hunters can tame them.
   // -------------------------------------------------------------------------
   brightwood_hare: {
-    id: 'brightwood_hare', name: 'Brightwood Hare', minLevel: 1, maxLevel: 2, mobType: 'animal',
+    id: 'brightwood_hare', name: 'Brightwood Hare', minLevel: 1, maxLevel: 2, type: 'beast',
     hpBase: 18, hpPerLevel: 8, dmgBase: 2, dmgPerLevel: 1.2, attackSpeed: 1.8,
     armorPerLevel: 6, moveSpeed: 9.5, aggroRadius: 0,
     loot: [
@@ -319,7 +319,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.45, color: 0xc8a972,
   },
   glade_fox: {
-    id: 'glade_fox', name: 'Glade Fox', minLevel: 2, maxLevel: 3, mobType: 'animal',
+    id: 'glade_fox', name: 'Glade Fox', minLevel: 2, maxLevel: 3, type: 'beast',
     hpBase: 26, hpPerLevel: 12, dmgBase: 3, dmgPerLevel: 1.5, attackSpeed: 1.7,
     armorPerLevel: 8, moveSpeed: 9, aggroRadius: 8,
     loot: [
@@ -329,7 +329,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.6, color: 0xd2691e,
   },
   spotted_fawn: {
-    id: 'spotted_fawn', name: 'Spotted Fawn', minLevel: 2, maxLevel: 3, mobType: 'animal',
+    id: 'spotted_fawn', name: 'Spotted Fawn', minLevel: 2, maxLevel: 3, type: 'beast',
     hpBase: 24, hpPerLevel: 11, dmgBase: 2, dmgPerLevel: 1.3, attackSpeed: 2.0,
     armorPerLevel: 7, moveSpeed: 8.5, aggroRadius: 0,
     loot: [
@@ -340,7 +340,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.65, color: 0xb5895f,
   },
   meadow_crane: {
-    id: 'meadow_crane', name: 'Meadow Crane', minLevel: 3, maxLevel: 4, mobType: 'animal',
+    id: 'meadow_crane', name: 'Meadow Crane', minLevel: 3, maxLevel: 4, type: 'beast',
     hpBase: 34, hpPerLevel: 14, dmgBase: 4, dmgPerLevel: 1.6, attackSpeed: 1.9,
     armorPerLevel: 9, moveSpeed: 8.5, aggroRadius: 9,
     loot: [
@@ -350,7 +350,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.8, color: 0xeaeaea,
   },
   thornpelt_badger: {
-    id: 'thornpelt_badger', name: 'Thornpelt Badger', minLevel: 3, maxLevel: 4, mobType: 'animal',
+    id: 'thornpelt_badger', name: 'Thornpelt Badger', minLevel: 3, maxLevel: 4, type: 'beast',
     hpBase: 44, hpPerLevel: 16, dmgBase: 5, dmgPerLevel: 1.8, attackSpeed: 2.1,
     armorPerLevel: 14, moveSpeed: 7, aggroRadius: 10,
     // A stubborn digger — its coarse coat pricks anyone who melees it.
@@ -362,7 +362,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.7, color: 0x5d5d5d,
   },
   dawnmane_doe: {
-    id: 'dawnmane_doe', name: 'Dawnmane Doe', minLevel: 3, maxLevel: 4, mobType: 'animal',
+    id: 'dawnmane_doe', name: 'Dawnmane Doe', minLevel: 3, maxLevel: 4, type: 'beast',
     hpBase: 40, hpPerLevel: 16, dmgBase: 4, dmgPerLevel: 1.7, attackSpeed: 2.0,
     armorPerLevel: 10, moveSpeed: 8.5, aggroRadius: 8,
     loot: [
@@ -373,7 +373,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.85, color: 0xa9763f,
   },
   bramble_lynx: {
-    id: 'bramble_lynx', name: 'Bramble Lynx', minLevel: 4, maxLevel: 5, mobType: 'animal',
+    id: 'bramble_lynx', name: 'Bramble Lynx', minLevel: 4, maxLevel: 5, type: 'beast',
     hpBase: 50, hpPerLevel: 18, dmgBase: 6, dmgPerLevel: 2.0, attackSpeed: 1.7,
     armorPerLevel: 12, moveSpeed: 8.5, aggroRadius: 11,
     // Hunts in loose prides — a wounded lynx yowls and the pride goes savage.
@@ -385,7 +385,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 0.8, color: 0x8a6d3b,
   },
   brightwood_stag: {
-    id: 'brightwood_stag', name: 'Brightwood Stag', minLevel: 4, maxLevel: 5, mobType: 'animal',
+    id: 'brightwood_stag', name: 'Brightwood Stag', minLevel: 4, maxLevel: 5, type: 'beast',
     hpBase: 62, hpPerLevel: 20, dmgBase: 7, dmgPerLevel: 2.2, attackSpeed: 2.3,
     armorPerLevel: 14, moveSpeed: 8, aggroRadius: 9,
     // Lowers its antlers and bulls forward, swinging harder as the fight drags on.
@@ -398,7 +398,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x946638,
   },
   grovetusk_boar: {
-    id: 'grovetusk_boar', name: 'Grovetusk Boar', minLevel: 5, maxLevel: 6, mobType: 'animal',
+    id: 'grovetusk_boar', name: 'Grovetusk Boar', minLevel: 5, maxLevel: 6, type: 'beast',
     hpBase: 74, hpPerLevel: 22, dmgBase: 8, dmgPerLevel: 2.4, attackSpeed: 2.2,
     armorPerLevel: 16, moveSpeed: 7.5, aggroRadius: 10,
     thorns: { value: 4, name: 'Bristled Hide' },
@@ -410,7 +410,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0x6b4423,
   },
   sunhide_bear: {
-    id: 'sunhide_bear', name: 'Sunhide Bear', minLevel: 5, maxLevel: 6, mobType: 'animal',
+    id: 'sunhide_bear', name: 'Sunhide Bear', minLevel: 5, maxLevel: 6, type: 'beast',
     hpBase: 98, hpPerLevel: 24, dmgBase: 9, dmgPerLevel: 2.6, attackSpeed: 2.5,
     armorPerLevel: 20, moveSpeed: 7.2, aggroRadius: 11,
     // A heavy bruiser that turns furious when cornered.
@@ -423,7 +423,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.2, color: 0xc99a4b,
   },
   brightwood_monarch: {
-    id: 'brightwood_monarch', name: 'The Brightwood Monarch', minLevel: 6, maxLevel: 6, mobType: 'animal', rare: true,
+    id: 'brightwood_monarch', name: 'The Brightwood Monarch', minLevel: 6, maxLevel: 6, type: 'beast', rare: true,
     elite: true, ccImmune: true, respawnMult: 7.2,
     hpBase: 240, hpPerLevel: 48, dmgBase: 11, dmgPerLevel: 3.2, attackSpeed: 2.4,
     armorPerLevel: 26, moveSpeed: 8, aggroRadius: 12,
@@ -441,7 +441,7 @@ export const ZONE1_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0xe0b84a,
   },
   gorrak: {
-    id: 'gorrak', name: 'Gorrak the Ruthless', minLevel: 6, maxLevel: 6, mobType: 'humanoid',
+    id: 'gorrak', name: 'Gorrak the Ruthless', minLevel: 6, maxLevel: 6, type: 'humanoid',
     hpBase: 160, hpPerLevel: 30, dmgBase: 8, dmgPerLevel: 2.4, attackSpeed: 2.4,
     armorPerLevel: 30, moveSpeed: 7, aggroRadius: 13, boss: true,
     loot: [

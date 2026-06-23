@@ -15,7 +15,7 @@ function template(overrides: Partial<MobTemplate> = {}): MobTemplate {
     name: 'Test Mob',
     minLevel: 1,
     maxLevel: 1,
-    mobType: 'humanoid',
+    type: 'humanoid',
     hpBase: 10,
     hpPerLevel: 1,
     dmgBase: 1,
@@ -153,7 +153,7 @@ describe('MobRuntime', () => {
       aggression: 'neutral',
       willFlee: true,
       allegiance: 'template_faction',
-      mobType: 'murloc',
+      type: 'murloc',
     }));
 
     expect(runtime.aggression).toBe('neutral');

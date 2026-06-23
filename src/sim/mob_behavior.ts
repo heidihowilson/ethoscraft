@@ -30,7 +30,7 @@ export class MobRuntime {
   }
 
   get socialPullRadius(): number {
-    return this.template?.mobType === 'murloc' ? MURLOC_SOCIAL_PULL_RADIUS : DEFAULT_SOCIAL_PULL_RADIUS;
+    return this.template?.type === 'murloc' ? MURLOC_SOCIAL_PULL_RADIUS : DEFAULT_SOCIAL_PULL_RADIUS;
   }
 
   fleeMoveSpeed(moveSpeedMult: number): number {
@@ -111,7 +111,7 @@ export function sameAllegiance(a: Entity, b: Entity): boolean {
 }
 
 export function socialPullRadius(template: MobTemplate | undefined): number {
-  return template?.mobType === 'murloc' ? MURLOC_SOCIAL_PULL_RADIUS : DEFAULT_SOCIAL_PULL_RADIUS;
+  return template?.type === 'murloc' ? MURLOC_SOCIAL_PULL_RADIUS : DEFAULT_SOCIAL_PULL_RADIUS;
 }
 
 export function mobIsInInstance(mob: Entity, dungeonXThreshold: number): boolean {

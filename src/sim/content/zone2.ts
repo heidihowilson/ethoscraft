@@ -54,7 +54,7 @@ export const ZONE2_ROADS: { x: number; z: number }[][] = [
 
 export const ZONE2_MOBS: Record<string, MobTemplate> = {
   mire_prowler: {
-    id: 'mire_prowler', name: 'Mire Prowler', minLevel: 7, maxLevel: 8, mobType: 'animal',
+    id: 'mire_prowler', name: 'Mire Prowler', minLevel: 7, maxLevel: 8, type: 'beast',
     hpBase: 46, hpPerLevel: 19, dmgBase: 7, dmgPerLevel: 2.1, attackSpeed: 2.0,
     armorPerLevel: 12, moveSpeed: 8.5, aggroRadius: 11,
     loot: [
@@ -69,7 +69,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     slowStrike: { chance: 0.3, mult: 1.3, duration: 8, name: 'Miring Pounce', school: 'physical' },
   },
   deepfen_murloc: {
-    id: 'deepfen_murloc', name: 'Deepfen Snapper', minLevel: 8, maxLevel: 9, mobType: 'murloc',
+    id: 'deepfen_murloc', name: 'Deepfen Snapper', minLevel: 8, maxLevel: 9, type: 'murloc',
     hpBase: 48, hpPerLevel: 19, dmgBase: 7, dmgPerLevel: 2.2, attackSpeed: 1.9,
     armorPerLevel: 12, moveSpeed: 8, aggroRadius: 14, // deepfen packs swarm from far out
     loot: [
@@ -85,7 +85,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     warcry: { radius: 12, every: 10, hasteMult: 1.25, duration: 6, name: 'Tide Cadence', school: 'frost' },
   },
   mirejaw_the_ravenous: {
-    id: 'mirejaw_the_ravenous', name: 'Mirejaw the Ravenous', minLevel: 10, maxLevel: 10, mobType: 'murloc', rare: true,
+    id: 'mirejaw_the_ravenous', name: 'Mirejaw the Ravenous', minLevel: 10, maxLevel: 10, type: 'murloc', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 648,
     hpBase: 320, hpPerLevel: 58, dmgBase: 15, dmgPerLevel: 3.7, attackSpeed: 1.8,
     armorPerLevel: 26, moveSpeed: 8.2, aggroRadius: 14,
@@ -103,14 +103,14 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0x1abc9c,
   },
   mirejaw_frenzy: {
-    id: 'mirejaw_frenzy', name: 'Mirejaw Frenzy', minLevel: 9, maxLevel: 10, mobType: 'murloc',
+    id: 'mirejaw_frenzy', name: 'Mirejaw Frenzy', minLevel: 9, maxLevel: 10, type: 'murloc',
     hpBase: 48, hpPerLevel: 18, dmgBase: 8, dmgPerLevel: 2.2, attackSpeed: 1.7,
     armorPerLevel: 12, moveSpeed: 8.5, aggroRadius: 14,
     loot: [],
     scale: 0.75, color: 0x1abc9c,
   },
   sloomtooth_the_drowned: {
-    id: 'sloomtooth_the_drowned', name: 'Sloomtooth the Drowned', minLevel: 11, maxLevel: 11, mobType: 'murloc', rare: true,
+    id: 'sloomtooth_the_drowned', name: 'Sloomtooth the Drowned', minLevel: 11, maxLevel: 11, type: 'murloc', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 648,
     hpBase: 340, hpPerLevel: 60, dmgBase: 16, dmgPerLevel: 3.8, attackSpeed: 1.9,
     armorPerLevel: 28, moveSpeed: 8.4, aggroRadius: 14,
@@ -129,7 +129,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.1, color: 0x2e86c1,
   },
   mire_widow: {
-    id: 'mire_widow', name: 'Mirefen Widow', minLevel: 8, maxLevel: 10, mobType: 'spider',
+    id: 'mire_widow', name: 'Mirefen Widow', minLevel: 8, maxLevel: 10, type: 'spider',
     hpBase: 48, hpPerLevel: 19, dmgBase: 8, dmgPerLevel: 2.2, attackSpeed: 1.8,
     armorPerLevel: 10, moveSpeed: 8, aggroRadius: 10,
     // Find Weakness: the widow's bite leaves the flesh raw, so critical blows
@@ -143,7 +143,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x283747,
   },
   mirefen_broodmother: {
-    id: 'mirefen_broodmother', name: 'The Broodmother', minLevel: 10, maxLevel: 10, mobType: 'spider',
+    id: 'mirefen_broodmother', name: 'The Broodmother', minLevel: 10, maxLevel: 10, type: 'spider',
     hpBase: 150, hpPerLevel: 26, dmgBase: 9, dmgPerLevel: 2.4, attackSpeed: 1.8,
     armorPerLevel: 16, moveSpeed: 8, aggroRadius: 14, boss: true,
     stackPoison: { chance: 0.35, perTick: 3, interval: 2, duration: 12, maxStacks: 5, name: 'Brood Venom', school: 'nature' },
@@ -156,7 +156,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.4, color: 0x641e16,
   },
   drowned_dead: {
-    id: 'drowned_dead', name: 'Drowned Dead', minLevel: 9, maxLevel: 11, mobType: 'undead',
+    id: 'drowned_dead', name: 'Drowned Dead', minLevel: 9, maxLevel: 11, type: 'undead',
     hpBase: 52, hpPerLevel: 20, dmgBase: 8, dmgPerLevel: 2.3, attackSpeed: 2.3,
     armorPerLevel: 14, moveSpeed: 6.5, aggroRadius: 11,
     lifeleech: { healFrac: 0.5, chance: 0.35, name: 'Drowning Grasp' },
@@ -171,7 +171,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x7fb3d5,
   },
   fen_troll: {
-    id: 'fen_troll', name: 'Mirefen Troll', minLevel: 10, maxLevel: 12, mobType: 'troll',
+    id: 'fen_troll', name: 'Mirefen Troll', minLevel: 10, maxLevel: 12, type: 'troll',
     hpBase: 56, hpPerLevel: 21, dmgBase: 9, dmgPerLevel: 2.4, attackSpeed: 2.2,
     armorPerLevel: 18, moveSpeed: 7.5, aggroRadius: 11,
     // Withering Rot: the troll's fetid claws rot a struck victim's sinews, draining
@@ -187,7 +187,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.15, color: 0x229954,
   },
   grubjaw: {
-    id: 'grubjaw', name: 'Grubjaw the Glutton', minLevel: 12, maxLevel: 12, mobType: 'troll', rare: true,
+    id: 'grubjaw', name: 'Grubjaw the Glutton', minLevel: 12, maxLevel: 12, type: 'troll', rare: true,
     hpBase: 130, hpPerLevel: 26, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 2.2,
     armorPerLevel: 20, moveSpeed: 7.5, aggroRadius: 13,
     loot: [
@@ -199,7 +199,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0x145a32,
   },
   gravecaller_cultist: {
-    id: 'gravecaller_cultist', name: 'Gravecaller Cultist', minLevel: 10, maxLevel: 12, mobType: 'humanoid',
+    id: 'gravecaller_cultist', name: 'Gravecaller Cultist', minLevel: 10, maxLevel: 12, type: 'humanoid',
     willFlee: true, allegiance: 'gravecaller_cult',
     hpBase: 50, hpPerLevel: 20, dmgBase: 9, dmgPerLevel: 2.4, attackSpeed: 2.0,
     armorPerLevel: 20, moveSpeed: 7, aggroRadius: 11,
@@ -217,7 +217,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x6c3483,
   },
   gravecaller_summoner: {
-    id: 'gravecaller_summoner', name: 'Gravecaller Summoner', minLevel: 11, maxLevel: 12, mobType: 'humanoid',
+    id: 'gravecaller_summoner', name: 'Gravecaller Summoner', minLevel: 11, maxLevel: 12, type: 'humanoid',
     hpBase: 46, hpPerLevel: 19, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 2.0,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 12,
     silence: { chance: 0.3, duration: 4, name: 'Silencing Shriek', school: 'shadow' },
@@ -236,7 +236,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x884ea0,
   },
   gravecaller_mender: {
-    id: 'gravecaller_mender', name: 'Gravecaller Mender', minLevel: 11, maxLevel: 12, mobType: 'humanoid',
+    id: 'gravecaller_mender', name: 'Gravecaller Mender', minLevel: 11, maxLevel: 12, type: 'humanoid',
     hpBase: 44, hpPerLevel: 18, dmgBase: 8, dmgPerLevel: 2.2, attackSpeed: 2.1,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 12,
     // Grave Mending: keeps its cultist pack alive, knitting every wounded ally's
@@ -254,7 +254,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x9b59b6,
   },
   sister_nhalia: {
-    id: 'sister_nhalia', name: 'Sister Nhalia', minLevel: 12, maxLevel: 12, mobType: 'humanoid', rare: true,
+    id: 'sister_nhalia', name: 'Sister Nhalia', minLevel: 12, maxLevel: 12, type: 'humanoid', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 648,
     hpBase: 330, hpPerLevel: 60, dmgBase: 16, dmgPerLevel: 3.8, attackSpeed: 2.0,
     armorPerLevel: 30, moveSpeed: 7, aggroRadius: 13,
@@ -275,7 +275,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.08, color: 0x3b1f4a,
   },
   nhalia_mourner: {
-    id: 'nhalia_mourner', name: 'Nhalia Mourner', minLevel: 11, maxLevel: 12, mobType: 'humanoid',
+    id: 'nhalia_mourner', name: 'Nhalia Mourner', minLevel: 11, maxLevel: 12, type: 'humanoid',
     hpBase: 46, hpPerLevel: 17, dmgBase: 8, dmgPerLevel: 2.3, attackSpeed: 2.0,
     armorPerLevel: 14, moveSpeed: 7, aggroRadius: 12,
     // Curse of Tongues: the mourners' dirge garbles a caster's incantations, slowing
@@ -285,7 +285,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 0.95, color: 0x332044,
   },
   deacon_voss: {
-    id: 'deacon_voss', name: 'Deacon Voss', minLevel: 12, maxLevel: 12, mobType: 'humanoid',
+    id: 'deacon_voss', name: 'Deacon Voss', minLevel: 12, maxLevel: 12, type: 'humanoid',
     hpBase: 200, hpPerLevel: 30, dmgBase: 11, dmgPerLevel: 2.5, attackSpeed: 2.4,
     armorPerLevel: 26, moveSpeed: 7, aggroRadius: 14, boss: true,
     aoePulse: { min: 10, max: 14, radius: 10, every: 12, name: 'Drowning Hymn' },
@@ -299,7 +299,7 @@ export const ZONE2_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0x512e5f,
   },
   bog_bloat: {
-    id: 'bog_bloat', name: 'Bog Bloat', minLevel: 9, maxLevel: 11, mobType: 'animal',
+    id: 'bog_bloat', name: 'Bog Bloat', minLevel: 9, maxLevel: 11, type: 'beast',
     hpBase: 44, hpPerLevel: 17, dmgBase: 7, dmgPerLevel: 2.0, attackSpeed: 2.6,
     armorPerLevel: 9, moveSpeed: 6, aggroRadius: 10,
     // A swollen marsh gas-bag: when slain its corpse swells for 1.5s, then

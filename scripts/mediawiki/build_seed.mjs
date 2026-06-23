@@ -247,9 +247,9 @@ for (const [id, quest] of Object.entries(QUESTS)) {
 for (const [id, mob] of Object.entries(MOBS)) {
   const mechanics = [mob.boss ? 'Boss' : '', mob.elite ? 'Elite' : '', mob.rare ? 'Rare' : '', mob.aoePulse ? 'AoE: ' + mob.aoePulse.name : '', mob.enrage ? 'Enrage below ' + Math.round(mob.enrage.belowHpPct * 100) + '%' : ''].filter(Boolean);
   const loot = mob.loot.map((entry) => entry.itemId ? ITEMS[entry.itemId] : null).filter(Boolean);
-  add(titleBy.mob.get(id), section('Overview', mob.name + ' is a level ' + (mob.minLevel === mob.maxLevel ? mob.minLevel : mob.minLevel + '-' + mob.maxLevel) + ' ' + mob.mobType + '.') + section('Facts', table([
-    ['Mob type', mob.mobType], ['Level', mob.minLevel === mob.maxLevel ? String(mob.minLevel) : mob.minLevel + '-' + mob.maxLevel], ['Aggro radius', String(mob.aggroRadius)], ['Attack speed', String(mob.attackSpeed)],
-  ])) + (mechanics.length ? section('Mechanics', bullets(mechanics)) : '') + (loot.length ? section('Loot', bullets(loot.map((item) => link(titleBy.item.get(item.id), item.name)))) : ''), ['Mobs', mob.mobType]);
+  add(titleBy.mob.get(id), section('Overview', mob.name + ' is a level ' + (mob.minLevel === mob.maxLevel ? mob.minLevel : mob.minLevel + '-' + mob.maxLevel) + ' ' + mob.type + '.') + section('Facts', table([
+    ['Mob type', mob.type], ['Level', mob.minLevel === mob.maxLevel ? String(mob.minLevel) : mob.minLevel + '-' + mob.maxLevel], ['Aggro radius', String(mob.aggroRadius)], ['Attack speed', String(mob.attackSpeed)],
+  ])) + (mechanics.length ? section('Mechanics', bullets(mechanics)) : '') + (loot.length ? section('Loot', bullets(loot.map((item) => link(titleBy.item.get(item.id), item.name)))) : ''), ['Mobs', mob.type]);
 }
 
 for (const [id, item] of Object.entries(ITEMS)) {

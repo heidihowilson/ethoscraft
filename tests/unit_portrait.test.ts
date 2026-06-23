@@ -81,7 +81,7 @@ describe('crestIdForEntity', () => {
   });
 
   it('maps mobs to their creature-family crest', () => {
-    expect(crestIdForEntity('mob', 'animal')).toBe('family_beast'); // the Wild Boar case
+    expect(crestIdForEntity('mob', 'beast')).toBe('family_beast'); // the Wild Boar case
     expect(crestIdForEntity('mob', 'undead')).toBe('family_undead');
   });
 

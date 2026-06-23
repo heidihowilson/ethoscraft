@@ -7,7 +7,7 @@ import type { MobTemplate } from '../types';
 // at the owner's level (createMob reads the passed level, not minLevel/maxLevel).
 export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   imp: {
-    id: 'imp', name: 'Imp', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'imp', name: 'Imp', minLevel: 1, maxLevel: 60, type: 'demon',
     // squishy ranged caster: low health and armor, steady Firebolt damage
     hpBase: 30, hpPerLevel: 12,
     dmgBase: 5, dmgPerLevel: 1.6, attackSpeed: 2.0,
@@ -16,7 +16,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
     petRanged: { range: 25, school: 'fire' },
   },
   voidwalker: {
-    id: 'voidwalker', name: 'Voidwalker', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'voidwalker', name: 'Voidwalker', minLevel: 1, maxLevel: 60, type: 'demon',
     // tank: deep health pool and heavy armor, modest melee damage, taunts
     hpBase: 70, hpPerLevel: 28,
     dmgBase: 4, dmgPerLevel: 1.2, attackSpeed: 2.0,
@@ -26,7 +26,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   // Glass-cannon melee seductress: hits hard and fast on a light frame, but
   // folds quickly under retaliation — the warlock's leveling DPS demon.
   succubus: {
-    id: 'succubus', name: 'Succubus', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'succubus', name: 'Succubus', minLevel: 1, maxLevel: 60, type: 'demon',
     hpBase: 34, hpPerLevel: 14,
     dmgBase: 7, dmgPerLevel: 2.1, attackSpeed: 1.7,
     armorPerLevel: 12, moveSpeed: 5.4, aggroRadius: 8,
@@ -35,7 +35,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   // Anti-caster hound: a ranged Shadow Bite skirmisher with the imp's reach but
   // a sturdier body, the classic counter-pick against enemy spellcasters.
   felhunter: {
-    id: 'felhunter', name: 'Felhunter', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'felhunter', name: 'Felhunter', minLevel: 1, maxLevel: 60, type: 'demon',
     hpBase: 46, hpPerLevel: 18,
     dmgBase: 6, dmgPerLevel: 1.7, attackSpeed: 2.0,
     armorPerLevel: 20, moveSpeed: 5.6, aggroRadius: 8,
@@ -45,7 +45,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   // All-rounder felguard: deeper health and armor than the succubus with nearly
   // her damage — the warlock's durable melee bruiser once it can be summoned.
   felguard: {
-    id: 'felguard', name: 'Felguard', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'felguard', name: 'Felguard', minLevel: 1, maxLevel: 60, type: 'demon',
     hpBase: 80, hpPerLevel: 30,
     dmgBase: 7, dmgPerLevel: 2.0, attackSpeed: 2.2,
     armorPerLevel: 38, moveSpeed: 5.2, aggroRadius: 8,
@@ -54,7 +54,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   // Bound infernal: a hulking, slow-swinging juggernaut with the deepest health
   // and armor of any demon and crushing melee — a long-cooldown power summon.
   infernal: {
-    id: 'infernal', name: 'Infernal', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'infernal', name: 'Infernal', minLevel: 1, maxLevel: 60, type: 'demon',
     hpBase: 130, hpPerLevel: 42,
     dmgBase: 10, dmgPerLevel: 2.6, attackSpeed: 2.8,
     armorPerLevel: 55, moveSpeed: 4.8, aggroRadius: 8,
@@ -63,7 +63,7 @@ export const WARLOCK_PET_MOBS: Record<string, MobTemplate> = {
   // Bound doomguard: an elite ranged Shadow caster that rains heavy damage from
   // afar — the warlock's high-end nuke demon, summoned at great cost.
   doomguard: {
-    id: 'doomguard', name: 'Doomguard', minLevel: 1, maxLevel: 60, mobType: 'demon',
+    id: 'doomguard', name: 'Doomguard', minLevel: 1, maxLevel: 60, type: 'demon',
     hpBase: 95, hpPerLevel: 34,
     dmgBase: 11, dmgPerLevel: 2.4, attackSpeed: 2.4,
     armorPerLevel: 30, moveSpeed: 5.0, aggroRadius: 8,

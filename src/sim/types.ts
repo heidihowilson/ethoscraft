@@ -208,7 +208,7 @@ export interface LootEntry {
 }
 
 export type MobType =
-  | 'animal' | 'human' | 'humanoid' | 'murloc' | 'spider' | 'kobold' | 'undead'
+  | 'beast' | 'human' | 'humanoid' | 'murloc' | 'spider' | 'kobold' | 'undead'
   | 'troll' | 'ogre' | 'elemental' | 'dragonkin' | 'demon';
 export type MobAggression = 'neutral' | 'aggressive';
 export type PetMode = 'passive' | 'defensive' | 'aggressive';
@@ -219,7 +219,7 @@ export interface MobTemplate {
   name: string;
   minLevel: number;
   maxLevel: number;
-  mobType: MobType;
+  type: MobType;
   aggression?: MobAggression;
   willFlee?: boolean;
   allegiance?: string;

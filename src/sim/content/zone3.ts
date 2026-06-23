@@ -46,7 +46,7 @@ export const ZONE3_ROADS: { x: number; z: number }[][] = [
 
 export const ZONE3_MOBS: Record<string, MobTemplate> = {
   ridge_stalker: {
-    id: 'ridge_stalker', name: 'Ridge Stalker', minLevel: 13, maxLevel: 14, mobType: 'animal',
+    id: 'ridge_stalker', name: 'Ridge Stalker', minLevel: 13, maxLevel: 14, type: 'beast',
     hpBase: 58, hpPerLevel: 21, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 1.9,
     armorPerLevel: 14, moveSpeed: 8, aggroRadius: 11,
     // Rending Claws: the stalker's raking swipes can open a bleeding wound — a
@@ -64,7 +64,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
   // Ridge Stalkers, met first when climbing into Thornpeak. Reuses existing
   // mechanics only — a rending pounce (aoePulse) and a wounded-beast enrage.
   old_cragmaw: {
-    id: 'old_cragmaw', name: 'Old Cragmaw', minLevel: 14, maxLevel: 14, mobType: 'animal', rare: true,
+    id: 'old_cragmaw', name: 'Old Cragmaw', minLevel: 14, maxLevel: 14, type: 'beast', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 7.2,
     hpBase: 320, hpPerLevel: 56, dmgBase: 16, dmgPerLevel: 4.0, attackSpeed: 1.7,
     armorPerLevel: 24, moveSpeed: 8.6, aggroRadius: 13,
@@ -78,7 +78,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0x6e6453,
   },
   deeprock_kobold: {
-    id: 'deeprock_kobold', name: 'Deeprock Tunneler', minLevel: 14, maxLevel: 15, mobType: 'kobold',
+    id: 'deeprock_kobold', name: 'Deeprock Tunneler', minLevel: 14, maxLevel: 15, type: 'kobold',
     hpBase: 60, hpPerLevel: 22, dmgBase: 10, dmgPerLevel: 2.5, attackSpeed: 2.1,
     armorPerLevel: 18, moveSpeed: 7, aggroRadius: 10,
     loot: [
@@ -93,7 +93,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     staggerHit: { chance: 0.3, dodgeReduction: 0.05, duration: 8, name: 'Off-Balance' },
   },
   ironvein_foreman: {
-    id: 'ironvein_foreman', name: 'Ironvein Foreman', minLevel: 16, maxLevel: 16, mobType: 'kobold', rare: true,
+    id: 'ironvein_foreman', name: 'Ironvein Foreman', minLevel: 16, maxLevel: 16, type: 'kobold', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 864,
     hpBase: 420, hpPerLevel: 70, dmgBase: 19, dmgPerLevel: 4.4, attackSpeed: 2.0,
     armorPerLevel: 38, moveSpeed: 7, aggroRadius: 12,
@@ -112,7 +112,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0xb0823a,
   },
   ironvein_sapper: {
-    id: 'ironvein_sapper', name: 'Ironvein Sapper', minLevel: 15, maxLevel: 16, mobType: 'kobold',
+    id: 'ironvein_sapper', name: 'Ironvein Sapper', minLevel: 15, maxLevel: 16, type: 'kobold',
     hpBase: 58, hpPerLevel: 20, dmgBase: 11, dmgPerLevel: 2.6, attackSpeed: 2.0,
     armorPerLevel: 18, moveSpeed: 7.5, aggroRadius: 12,
     smolder: { chance: 0.25, perTick: 5, interval: 3, duration: 12, name: 'Smoldering Fuse' },
@@ -122,7 +122,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 0.85, color: 0x8f6b34,
   },
   thornpeak_ogre: {
-    id: 'thornpeak_ogre', name: 'Thornpeak Ogre', minLevel: 15, maxLevel: 16, mobType: 'ogre',
+    id: 'thornpeak_ogre', name: 'Thornpeak Ogre', minLevel: 15, maxLevel: 16, type: 'ogre',
     hpBase: 66, hpPerLevel: 23, dmgBase: 11, dmgPerLevel: 2.6, attackSpeed: 2.6,
     armorPerLevel: 22, moveSpeed: 7, aggroRadius: 11,
     concuss: { chance: 0.2, duration: 2, name: 'Concussive Blow' },
@@ -133,7 +133,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0x9e7b53,
   },
   ogre_crusher: {
-    id: 'ogre_crusher', name: 'Thornpeak Crusher', minLevel: 16, maxLevel: 17, mobType: 'ogre', elite: true,
+    id: 'ogre_crusher', name: 'Thornpeak Crusher', minLevel: 16, maxLevel: 17, type: 'ogre', elite: true,
     hpBase: 64, hpPerLevel: 23, dmgBase: 11, dmgPerLevel: 2.6, attackSpeed: 2.6,
     armorPerLevel: 24, moveSpeed: 7, aggroRadius: 12,
     // Disarming Smash: a war-camp crusher's two-handed blow can batter the weapon
@@ -147,7 +147,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.35, color: 0x7e5c3e,
   },
   warlord_drogmar: {
-    id: 'warlord_drogmar', name: 'Warlord Drogmar', minLevel: 17, maxLevel: 17, mobType: 'ogre',
+    id: 'warlord_drogmar', name: 'Warlord Drogmar', minLevel: 17, maxLevel: 17, type: 'ogre',
     elite: true, boss: true,
     hpBase: 200, hpPerLevel: 30, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.6,
     armorPerLevel: 28, moveSpeed: 7, aggroRadius: 14,
@@ -170,7 +170,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     // it slams the ground in a physical shockwave and goes berserk when low.
     // Fills the ogre rare gap beside Ironvein Foreman (kobold), Shardlord
     // Kazzix (elemental) and Marrowlord Varkas (undead).
-    id: 'brutok_skullsmasher', name: 'Brutok Skullsmasher', minLevel: 17, maxLevel: 17, mobType: 'ogre', rare: true,
+    id: 'brutok_skullsmasher', name: 'Brutok Skullsmasher', minLevel: 17, maxLevel: 17, type: 'ogre', rare: true,
     elite: true, ccImmune: true, respawnMult: 432,
     hpBase: 360, hpPerLevel: 60, dmgBase: 16, dmgPerLevel: 3.6, attackSpeed: 2.7,
     armorPerLevel: 30, moveSpeed: 7, aggroRadius: 13,
@@ -187,7 +187,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.45, color: 0x6e5235,
   },
   stormcrag_elemental: {
-    id: 'stormcrag_elemental', name: 'Stormcrag Elemental', minLevel: 17, maxLevel: 18, mobType: 'elemental',
+    id: 'stormcrag_elemental', name: 'Stormcrag Elemental', minLevel: 17, maxLevel: 18, type: 'elemental',
     hpBase: 62, hpPerLevel: 22, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.2,
     armorPerLevel: 20, moveSpeed: 6.5, aggroRadius: 11,
     loot: [
@@ -206,7 +206,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     spellVuln: { chance: 0.3, amp: 0.18, duration: 10, name: 'Static Charge', school: 'nature' },
   },
   shardlord_kazzix: {
-    id: 'shardlord_kazzix', name: 'Shardlord Kazzix', minLevel: 18, maxLevel: 18, mobType: 'elemental', rare: true,
+    id: 'shardlord_kazzix', name: 'Shardlord Kazzix', minLevel: 18, maxLevel: 18, type: 'elemental', rare: true,
     hpBase: 160, hpPerLevel: 28, dmgBase: 13, dmgPerLevel: 2.8, attackSpeed: 2.2,
     armorPerLevel: 24, moveSpeed: 7, aggroRadius: 12,
     loot: [
@@ -220,7 +220,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.3, color: 0xaed6f1,
   },
   wyrmcult_zealot: {
-    id: 'wyrmcult_zealot', name: 'Wyrmcult Zealot', minLevel: 17, maxLevel: 19, mobType: 'humanoid',
+    id: 'wyrmcult_zealot', name: 'Wyrmcult Zealot', minLevel: 17, maxLevel: 19, type: 'humanoid',
     hpBase: 62, hpPerLevel: 22, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.0,
     armorPerLevel: 20, moveSpeed: 7, aggroRadius: 11,
     loot: [
@@ -238,7 +238,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x76448a,
   },
   wyrmcult_necromancer: {
-    id: 'wyrmcult_necromancer', name: 'Wyrmcult Necromancer', minLevel: 18, maxLevel: 19, mobType: 'humanoid',
+    id: 'wyrmcult_necromancer', name: 'Wyrmcult Necromancer', minLevel: 18, maxLevel: 19, type: 'humanoid',
     hpBase: 58, hpPerLevel: 21, dmgBase: 13, dmgPerLevel: 2.8, attackSpeed: 2.0,
     armorPerLevel: 16, moveSpeed: 7, aggroRadius: 11,
     loot: [
@@ -253,7 +253,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.0, color: 0x533566,
   },
   boneclad_revenant: {
-    id: 'boneclad_revenant', name: 'Boneclad Revenant', minLevel: 18, maxLevel: 19, mobType: 'undead',
+    id: 'boneclad_revenant', name: 'Boneclad Revenant', minLevel: 18, maxLevel: 19, type: 'undead',
     hpBase: 66, hpPerLevel: 23, dmgBase: 12, dmgPerLevel: 2.7, attackSpeed: 2.3,
     armorPerLevel: 18, moveSpeed: 6.5, aggroRadius: 11,
     enervate: { chance: 0.3, sta: 14, duration: 12, name: 'Soul Siphon', school: 'shadow' },
@@ -265,7 +265,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0xcacfd2,
   },
   fallen_captain_aldren: {
-    id: 'fallen_captain_aldren', name: 'Fallen Captain Aldren', minLevel: 20, maxLevel: 20, mobType: 'undead',
+    id: 'fallen_captain_aldren', name: 'Fallen Captain Aldren', minLevel: 20, maxLevel: 20, type: 'undead',
     elite: true, rare: true, canSwim: true, ccImmune: true, respawnMult: 4,
     hpBase: 390, hpPerLevel: 72, dmgBase: 22, dmgPerLevel: 4.2, attackSpeed: 2.2,
     armorPerLevel: 42, moveSpeed: 7.2, aggroRadius: 18,
@@ -278,7 +278,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.15, color: 0xbfc7ca,
   },
   corrupted_priest_malric: {
-    id: 'corrupted_priest_malric', name: 'Corrupted Priest Malric', minLevel: 20, maxLevel: 20, mobType: 'undead',
+    id: 'corrupted_priest_malric', name: 'Corrupted Priest Malric', minLevel: 20, maxLevel: 20, type: 'undead',
     elite: true, rare: true, canSwim: true, ccImmune: true, respawnMult: 4,
     hpBase: 360, hpPerLevel: 68, dmgBase: 23, dmgPerLevel: 4.3, attackSpeed: 2.3,
     armorPerLevel: 26, moveSpeed: 6.9, aggroRadius: 18,
@@ -294,7 +294,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.05, color: 0xd5d0e8,
   },
   deathstalker_voss: {
-    id: 'deathstalker_voss', name: 'Deathstalker Voss', minLevel: 20, maxLevel: 20, mobType: 'undead',
+    id: 'deathstalker_voss', name: 'Deathstalker Voss', minLevel: 20, maxLevel: 20, type: 'undead',
     elite: true, rare: true, canSwim: true, ccImmune: true, respawnMult: 4,
     hpBase: 410, hpPerLevel: 74, dmgBase: 24, dmgPerLevel: 4.5, attackSpeed: 2.1,
     armorPerLevel: 44, moveSpeed: 7.4, aggroRadius: 18,
@@ -308,25 +308,25 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.18, color: 0xc7c0b2,
   },
   vision_aldren_warrior: {
-    id: 'vision_aldren_warrior', name: 'Vision of Captain Aldren', minLevel: 20, maxLevel: 20, mobType: 'humanoid',
+    id: 'vision_aldren_warrior', name: 'Vision of Captain Aldren', minLevel: 20, maxLevel: 20, type: 'humanoid',
     hpBase: 1, hpPerLevel: 0, dmgBase: 0, dmgPerLevel: 0, attackSpeed: 2,
     armorPerLevel: 0, moveSpeed: 0, aggroRadius: 0,
     loot: [], scale: 1.0, color: 0xb8d7ff,
   },
   vision_malric_mage: {
-    id: 'vision_malric_mage', name: 'Vision of High Priest Malric', minLevel: 20, maxLevel: 20, mobType: 'humanoid',
+    id: 'vision_malric_mage', name: 'Vision of High Priest Malric', minLevel: 20, maxLevel: 20, type: 'humanoid',
     hpBase: 1, hpPerLevel: 0, dmgBase: 0, dmgPerLevel: 0, attackSpeed: 2,
     armorPerLevel: 0, moveSpeed: 0, aggroRadius: 0,
     loot: [], scale: 1.0, color: 0xc9b6ff,
   },
   vision_deathstalker_voss: {
-    id: 'vision_deathstalker_voss', name: 'Vision of Royal Assassin Voss', minLevel: 20, maxLevel: 20, mobType: 'humanoid',
+    id: 'vision_deathstalker_voss', name: 'Vision of Royal Assassin Voss', minLevel: 20, maxLevel: 20, type: 'humanoid',
     hpBase: 1, hpPerLevel: 0, dmgBase: 0, dmgPerLevel: 0, attackSpeed: 2,
     armorPerLevel: 0, moveSpeed: 0, aggroRadius: 0,
     loot: [], scale: 1.0, color: 0xb8d7ff,
   },
   bound_guardian: {
-    id: 'bound_guardian', name: 'The Bound Guardian', minLevel: 20, maxLevel: 20, mobType: 'undead',
+    id: 'bound_guardian', name: 'The Bound Guardian', minLevel: 20, maxLevel: 20, type: 'undead',
     elite: true, boss: true, canSwim: true, ccImmune: true, respawnMult: 1000,
     hpBase: 310, hpPerLevel: 48, dmgBase: 16, dmgPerLevel: 3.4, attackSpeed: 2.4,
     armorPerLevel: 42, moveSpeed: 6.8, aggroRadius: 16,
@@ -340,7 +340,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.35, color: 0xa8b0b8,
   },
   marrowlord_varkas: {
-    id: 'marrowlord_varkas', name: 'Marrowlord Varkas', minLevel: 19, maxLevel: 19, mobType: 'undead', rare: true,
+    id: 'marrowlord_varkas', name: 'Marrowlord Varkas', minLevel: 19, maxLevel: 19, type: 'undead', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 864,
     hpBase: 480, hpPerLevel: 80, dmgBase: 22, dmgPerLevel: 5.0, attackSpeed: 2.4,
     armorPerLevel: 44, moveSpeed: 6.5, aggroRadius: 13,
@@ -357,7 +357,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
     scale: 1.25, color: 0xd8d0bd,
   },
   varkas_boneguard: {
-    id: 'varkas_boneguard', name: 'Varkas Boneguard', minLevel: 18, maxLevel: 19, mobType: 'undead',
+    id: 'varkas_boneguard', name: 'Varkas Boneguard', minLevel: 18, maxLevel: 19, type: 'undead',
     hpBase: 64, hpPerLevel: 22, dmgBase: 12, dmgPerLevel: 2.8, attackSpeed: 2.3,
     armorPerLevel: 20, moveSpeed: 6.5, aggroRadius: 12,
     // Shattering Maul: a landed hit can crack the victim's guard, leaving them
@@ -370,7 +370,7 @@ export const ZONE3_MOBS: Record<string, MobTemplate> = {
   // and starved into a weapon. The only dragonkin rare on the peaks: it breathes
   // fire in a wide cone, and its searing bite leaves wounds that refuse to close.
   voskar_emberwing: {
-    id: 'voskar_emberwing', name: 'Voskar the Emberwing', minLevel: 19, maxLevel: 19, mobType: 'dragonkin', rare: true,
+    id: 'voskar_emberwing', name: 'Voskar the Emberwing', minLevel: 19, maxLevel: 19, type: 'dragonkin', rare: true,
     elite: true, canSwim: true, ccImmune: true, respawnMult: 864,
     hpBase: 470, hpPerLevel: 78, dmgBase: 22, dmgPerLevel: 4.9, attackSpeed: 2.5,
     armorPerLevel: 42, moveSpeed: 7, aggroRadius: 13,

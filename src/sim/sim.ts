@@ -1836,11 +1836,11 @@ export class Sim {
     for (const a of e.auras) if (a.kind === 'tongues') m = Math.max(m, a.value);
     return m;
   }
-  private mobCanSwim(template: { mobType?: string; canSwim?: boolean } | undefined): boolean {
+  private mobCanSwim(template: { type?: string; canSwim?: boolean } | undefined): boolean {
     return !!template;
   }
-  private mobCanSpawnInWater(template: { mobType?: string; canSwim?: boolean } | undefined): boolean {
-    return !!template && (template.canSwim === true || template.mobType === 'murloc');
+  private mobCanSpawnInWater(template: { type?: string; canSwim?: boolean } | undefined): boolean {
+    return !!template && (template.canSwim === true || template.type === 'murloc');
   }
   private isControlAura(kind: AuraKind): boolean {
     return kind === 'stun' || kind === 'root' || kind === 'incapacitate' || kind === 'polymorph';
@@ -2571,7 +2571,7 @@ export class Sim {
         }
         if (eff.type === 'polymorph') {
           if (target.kind === 'mob') {
-            const fam = MOBS[target.templateId]?.mobType;
+            const fam = MOBS[target.templateId]?.type;
             if (fam === 'undead' || target.templateId === 'gorrak') { this.error(p.id, 'This creature cannot be polymorphed.'); return; }
           } else if (target.kind !== 'player') {
             this.error(p.id, 'This creature cannot be polymorphed.');
@@ -3497,7 +3497,7 @@ export class Sim {
   private tameError(p: Entity, target: Entity): string | null {
     if (target.kind !== 'mob' || !target.hostile) return 'You cannot tame that.';
     const template = MOBS[target.templateId];
-    if (!template || (template.mobType !== 'animal' && template.mobType !== 'spider')) return 'Only beasts can be tamed.';
+    if (!template || (template.type !== 'beast' && template.type !== 'spider')) return 'Only beasts can be tamed.';
     if (template.elite || template.boss || template.rare) return 'That beast is too strong to tame.';
     if (target.level > p.level) return 'That beast is too high level for you to tame.';
     if (target.spawnPos.x > DUNGEON_X_THRESHOLD) return 'You cannot tame dungeon creatures.';
@@ -3832,7 +3832,7 @@ export class Sim {
   /** Tear-down for any pet: summoned demons vanish from the world; tamed beasts
    *  return to the wild and walk home. */
   private removePet(pet: Entity): void {
-    if (MOBS[pet.templateId]?.mobType === 'demon') this.despawnPet(pet);
+    if (MOBS[pet.templateId]?.type === 'demon') this.despawnPet(pet);
     else this.releasePetToWild(pet);
   }
 
@@ -4362,7 +4362,7 @@ export class Sim {
         e.inCombat = false;
         this.emit({ type: 'log', text: `${e.name} dies.`, color: '#f66', pid: e.ownerId });
         // a slain summoned demon lingers only briefly, then unravels (updateMob)
-        if (MOBS[e.templateId]?.mobType === 'demon') e.corpseTimer = 3;
+        if (MOBS[e.templateId]?.type === 'demon') e.corpseTimer = 3;
         return; // owned pets drop no loot/credit; demons unravel, hunters revive or abandon
       }
       this.frenzyPackmates(e); // wild packmates fly into a frenzy when one falls
@@ -4974,7 +4974,7 @@ export class Sim {
           { speaker: 'nythraxis', text: 'What have you done', delay: NYTHRAXIS_DIALOGUE_LINE_SECONDS },
         ]);
       }
-      if (mob.ownerId !== null && MOBS[mob.templateId]?.mobType !== 'demon') return;
+      if (mob.ownerId !== null && MOBS[mob.templateId]?.type !== 'demon') return;
       mob.corpseTimer -= DT;
       mob.respawnTimer -= DT;
       // Death Throes: a volatile corpse counts down its fuse, then detonates once.
@@ -4986,7 +4986,7 @@ export class Sim {
         }
       }
       // a slain summoned demon unravels rather than respawning into the wild
-      if (mob.ownerId !== null && MOBS[mob.templateId]?.mobType === 'demon') {
+      if (mob.ownerId !== null && MOBS[mob.templateId]?.type === 'demon') {
         if (mob.corpseTimer <= 0) this.despawnPet(mob);
         return;
       }
@@ -11573,7 +11573,7 @@ export class Sim {
   private petReadout(owner: Entity): string {
     const pet = this.petOf(owner.id);
     if (!pet) return 'You do not have a pet.';
-    const family = MOBS[pet.templateId]?.mobType;
+    const family = MOBS[pet.templateId]?.type;
     const kind = family ? ` ${family}` : '';
     const pct = pet.maxHp > 0 ? Math.round((pet.hp / pet.maxHp) * 100) : 0;
     return `Your pet: ${pet.name} (level ${pet.level}${kind}) — HP ${pet.hp}/${pet.maxHp} (${pct}%).`;

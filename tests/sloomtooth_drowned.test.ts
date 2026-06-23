@@ -9,7 +9,7 @@ describe('Sloomtooth the Drowned (rare elite)', () => {
   it('is registered as a rare elite murloc at level 11', () => {
     const m = MOBS.sloomtooth_the_drowned;
     expect(m).toBeDefined();
-    expect(m.mobType).toBe('murloc');
+    expect(m.type).toBe('murloc');
     expect(m.rare).toBe(true);
     expect(m.elite).toBe(true);
     expect(m.minLevel).toBe(11);

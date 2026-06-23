@@ -15,7 +15,7 @@ describe('rare spawn: Brutok Skullsmasher', () => {
     expect(b).toBeTruthy();
     expect(b.rare).toBe(true);
     expect(b.elite).toBe(true);
-    expect(b.mobType).toBe('ogre');
+    expect(b.type).toBe('ogre');
     // tougher than the trash ogres it prowls above (Thornpeak Crusher)
     expect(b.hpBase).toBeGreaterThan(MOBS['ogre_crusher'].hpBase);
     expect(b.respawnMult).toBeGreaterThan(1); // rares come back slowly
