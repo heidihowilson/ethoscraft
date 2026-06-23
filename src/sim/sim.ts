@@ -3035,10 +3035,10 @@ export class Sim {
 						);
 						if (e.dead) return;
 					} else if (a.kind === "hot") {
-						const healed = Math.min(
-							Math.round(a.value * this.healingTakenMult(e)),
-							e.maxHp - e.hp,
+						const threatHealAmount = Math.round(
+							a.value * this.healingTakenMult(e),
 						);
+						const healed = Math.min(threatHealAmount, e.maxHp - e.hp);
 						if (healed > 0) {
 							e.hp += healed;
 							this.emit({
@@ -3049,9 +3049,9 @@ export class Sim {
 								crit: false,
 								ability: a.name,
 							});
-							const src = this.entities.get(a.sourceId);
-							if (src) this.healingThreat(src, e, healed);
 						}
+						const src = this.entities.get(a.sourceId);
+						if (src) this.healingThreat(src, e, threatHealAmount);
 					} else if (a.kind === "polymorph") {
 						const heal = Math.round(e.maxHp * 0.1);
 						e.hp = Math.min(e.maxHp, e.hp + heal);
@@ -3684,12 +3684,13 @@ export class Sim {
 	): void {
 		if (target.dead) return;
 		const crit = this.rng.chance(this.spellCrit(source));
-		let healed = Math.round(
+		const threatHealAmount = Math.round(
 			amount *
 				(crit ? 1.5 : 1) *
 				this.hexOutputMult(source) *
 				this.healingTakenMult(target),
 		);
+		let healed = threatHealAmount;
 		healed = this.consumeHealAbsorb(target, healed);
 		healed = Math.min(healed, target.maxHp - target.hp);
 		target.hp += healed;
@@ -3701,16 +3702,20 @@ export class Sim {
 			crit,
 			ability,
 		});
-		this.healingThreat(source, target, healed);
+		this.healingThreat(source, target, threatHealAmount);
 	}
 
-	// Classic healing threat: 0.5 per point of EFFECTIVE healing (overheal is
-	// free), split evenly among every mob already fighting the healed target.
+	// Classic healing threat: 0.5 per point of modified heal output, including
+	// overheal, split evenly among every mob already fighting the healed target.
 	// Party membership does not change threat; it only affects social systems.
-	private healingThreat(source: Entity, target: Entity, healed: number): void {
-		if (source.kind !== "player" || healed <= 0) return;
+	private healingThreat(
+		source: Entity,
+		target: Entity,
+		healAmount: number,
+	): void {
+		if (source.kind !== "player" || healAmount <= 0) return;
 		const total =
-			healed * HEAL_THREAT_FACTOR * this.threatMod(source, "physical");
+			healAmount * HEAL_THREAT_FACTOR * this.threatMod(source, "physical");
 		const aware: Entity[] = [];
 		for (const m of this.entities.values()) {
 			if (

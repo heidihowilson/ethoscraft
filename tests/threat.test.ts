@@ -8,8 +8,8 @@ import {
 	DEFENSIVE_STANCE_THREAT_MULT,
 	RIGHTEOUS_FURY_THREAT_MULT,
 } from "../src/sim/threat";
-import type { Entity } from "../src/sim/types";
-import { dist2d } from "../src/sim/types";
+import type { Aura, Entity } from "../src/sim/types";
+import { DT, dist2d } from "../src/sim/types";
 import { terrainHeight } from "../src/sim/world";
 
 function makeSim(cls: Parameters<typeof simClass>[0] = "warrior", seed = 42) {
@@ -214,15 +214,15 @@ describe("healing threat", () => {
 		};
 	}
 
-	it("0.5 threat per effective heal point, split among every aware mob", () => {
+	it("0.5 threat per modified heal point, split among every aware mob", () => {
 		const { sim, tank, healer } = partyOfTwo();
 		const wolf = nearestMob(sim, "forest_wolf", tank);
 		beefUp(wolf);
 		hit(sim, tank, wolf, 50); // social aggro: nearby packmates join in too
 		tank.hp = 1;
 		(sim as any).applyHeal(healer, tank, 50, "Heal");
-		// the healer's threat across ALL aware mobs sums to healed * 0.5
-		// (the heal may crit for x1.5, and is capped by the tank's missing hp)
+		// the healer's threat across ALL aware mobs sums to modified heal output * 0.5
+		// (the heal may crit for x1.5)
 		let total = 0;
 		let awareMobs = 0;
 		for (const m of sim.entities.values()) {
@@ -246,6 +246,32 @@ describe("healing threat", () => {
 		(sim as any).applyHeal(healer, tank, 1000, "Heal");
 
 		expect(wolf.threat.get(healer.id)).toBeGreaterThanOrEqual(1000 * 0.5);
+	});
+
+	it("counts overheal toward healing threat from heal-over-time ticks", () => {
+		const { sim, tank, healer } = partyOfTwo();
+		const wolf = nearestMob(sim, "forest_wolf", tank);
+		beefUp(wolf);
+		hit(sim, tank, wolf, 50);
+		tank.hp = tank.maxHp - 1;
+
+		(
+			sim as unknown as { applyAura(target: Entity, aura: Aura): void }
+		).applyAura(tank, {
+			id: "test_renew",
+			name: "Renew",
+			kind: "hot",
+			remaining: 3,
+			duration: 3,
+			value: 200,
+			tickInterval: DT,
+			tickTimer: DT,
+			sourceId: healer.id,
+			school: "holy",
+		});
+		sim.tick();
+
+		expect(wolf.threat.get(healer.id)).toBeGreaterThanOrEqual(200 * 0.5);
 	});
 
 	it("healing threat splits across every mob in combat with the party", () => {
