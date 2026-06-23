@@ -1,17 +1,52 @@
 import { describe, expect, it } from "vitest";
 import { ZONE1_MOBS } from "../src/sim/content/zone1";
+import { createMob } from "../src/sim/entity";
 import { RUN_SPEED } from "../src/sim/types";
 
 describe("Eastbrook Vale mob movement speed", () => {
-	it("keeps starter-zone mobs slower than players, except Mogger", () => {
+	it("keeps authored starter-zone base speeds at or below player speed, except pets", () => {
 		for (const mob of Object.values(ZONE1_MOBS)) {
 			if (mob.petRole) continue;
-			if (mob.id === "mogger") {
-				expect(mob.moveSpeed).toBe(RUN_SPEED);
-				continue;
-			}
-			expect(mob.moveSpeed).toBeLessThan(RUN_SPEED);
+			expect(mob.moveSpeed).toBeLessThanOrEqual(RUN_SPEED);
 		}
+	});
+
+	it("scales normal starter-zone mob speed by level when mobs initialize", () => {
+		const levelOneWolf = createMob(1, ZONE1_MOBS.forest_wolf, 1, {
+			x: 0,
+			y: 0,
+			z: 0,
+		});
+		const levelFiveWolf = createMob(2, ZONE1_MOBS.forest_wolf, 5, {
+			x: 0,
+			y: 0,
+			z: 0,
+		});
+		const levelTenWolf = createMob(3, ZONE1_MOBS.forest_wolf, 10, {
+			x: 0,
+			y: 0,
+			z: 0,
+		});
+
+		expect(levelOneWolf.moveSpeed).toBeCloseTo(RUN_SPEED * 0.7, 5);
+		expect(levelFiveWolf.moveSpeed).toBeCloseTo(RUN_SPEED * (0.7 + 4 / 30), 5);
+		expect(levelTenWolf.moveSpeed).toBe(RUN_SPEED);
+	});
+
+	it("does not speed-scale starter-zone elites or pets", () => {
+		const elite = createMob(4, ZONE1_MOBS.elder_bristleback, 5, {
+			x: 0,
+			y: 0,
+			z: 0,
+		});
+		const pet = createMob(5, ZONE1_MOBS.warlock_voidwalker, 10, {
+			x: 0,
+			y: 0,
+			z: 0,
+		});
+
+		expect(elite.moveSpeed).toBe(ZONE1_MOBS.elder_bristleback.moveSpeed);
+		expect(pet.moveSpeed).toBe(ZONE1_MOBS.warlock_voidwalker.moveSpeed);
 	});
 });
 
