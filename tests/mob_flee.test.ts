@@ -58,6 +58,22 @@ function moveEntityToward(e: Entity, target: Entity, step: number) {
 	e.prevPos = { ...e.pos };
 }
 
+function nearestMobPair(mobs: Entity[]): [Entity, Entity] {
+	let best: [Entity, Entity] | null = null;
+	let bestDistance = Infinity;
+	for (let i = 0; i < mobs.length; i++) {
+		for (let j = i + 1; j < mobs.length; j++) {
+			const distance = dist2d(mobs[i].pos, mobs[j].pos);
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				best = [mobs[i], mobs[j]];
+			}
+		}
+	}
+	if (!best) throw new Error("expected at least two mobs");
+	return best;
+}
+
 describe("willFlee mobs flee at low HP", () => {
 	it("a low-HP willFlee mob panics and enters the flee state", () => {
 		const sim = makeSim();
@@ -153,20 +169,24 @@ describe("willFlee mobs flee at low HP", () => {
 
 	it("calls a nearby same-allegiance ally into the fight when it flees", () => {
 		const sim = makeSim();
-		const mobs = wildMobs(sim);
-		const fleer = mobs[0];
-		const ally = mobs.find((m) => m.id !== fleer.id)!;
-		engageLowHp(sim, fleer, "gravecaller_cultist", 0.12);
-		// an idle ally in the same faction standing right next to the fleer
-		ally.templateId = "forest_wolf";
-		fleer.allegiance = "gravecaller_cult";
-		ally.allegiance = "gravecaller_cult";
+		const [fleer, ally] = nearestMobPair(
+			wildMobs(sim).filter((m) => m.templateId === "tunnel_rat"),
+		);
+		fleer.maxHp = 1000;
+		fleer.hp = Math.round(fleer.maxHp * 0.12);
+		fleer.auras = [];
+		fleer.enraged = false;
+		fleer.hasFled = false;
+		fleer.fleeTimer = 0;
+		fleer.fleeReturnTimer = 0;
+		fleer.aiState = "attack";
+		fleer.aggroTargetId = sim.playerId;
+		fleer.inCombat = true;
+		fleer.hostile = true;
 		ally.hostile = true;
 		ally.dead = false;
 		ally.aiState = "idle";
 		ally.aggroTargetId = null;
-		ally.pos = { x: fleer.pos.x + 2, z: fleer.pos.z, y: fleer.pos.y };
-		ally.prevPos = { ...ally.pos };
 
 		sim.tick();
 

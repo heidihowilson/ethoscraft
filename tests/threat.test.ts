@@ -508,21 +508,21 @@ describe("rogue stealth", () => {
 	it("scales stealth detection by observer level for creatures", () => {
 		const sim = makeSim("rogue");
 		sim.setPlayerLevel(10);
-		const wolf = nearestMob(sim, "forest_wolf");
-		wolf.level = 10;
-		sim.player.level = wolf.level;
-		teleport(sim, sim.player, wolf.pos.x + 200, wolf.pos.z);
+		const rat = nearestMob(sim, "tunnel_rat");
+		rat.level = 10;
+		sim.player.level = rat.level;
+		teleport(sim, sim.player, rat.pos.x + 200, rat.pos.z);
 		sim.castAbility("stealth");
 		expect(sim.player.auras.some((a) => a.kind === "stealth")).toBe(true);
 
-		wolf.wanderTarget = null;
-		teleport(sim, sim.player, wolf.pos.x + 6, wolf.pos.z);
+		rat.wanderTarget = null;
+		teleport(sim, sim.player, rat.pos.x + 6, rat.pos.z);
 		for (let i = 0; i < 20; i++) sim.tick();
-		expect(wolf.aiState).toBe("idle");
+		expect(rat.aiState).toBe("idle");
 
-		wolf.level = 15;
-		for (let i = 0; i < 20 && wolf.aiState === "idle"; i++) sim.tick();
-		expect(wolf.aiState).not.toBe("idle");
+		rat.level = 15;
+		for (let i = 0; i < 20 && rat.aiState === "idle"; i++) sim.tick();
+		expect(rat.aiState).not.toBe("idle");
 	});
 
 	it("a closer stealthed player does not shield a visible ally from aggro", () => {
@@ -535,20 +535,20 @@ describe("rogue stealth", () => {
 		const warrior = sim.entities.get(sim.addPlayer("warrior", "Visible"))!;
 		sim.setPlayerLevel(5, rogue.id);
 		sim.setPlayerLevel(5, warrior.id);
-		const wolf = nearestMob(sim, "forest_wolf", rogue);
-		wolf.wanderTarget = null;
-		// equal levels: no level-difference radius skew (forest_wolf aggroRadius 10,
+		const rat = nearestMob(sim, "tunnel_rat", rogue);
+		rat.wanderTarget = null;
+		// equal levels: no level-difference radius skew (tunnel_rat aggroRadius 10,
 		// shrunk to ~2.5 while stealthed)
-		wolf.level = 5;
+		rat.level = 5;
 		// rogue is NEAREST (4yd) but stealthed and outside its shrunk radius;
-		// the warrior is visible at 6yd, well inside the wolf's 10yd aggro radius
-		teleport(sim, rogue, wolf.pos.x + 4, wolf.pos.z);
-		teleport(sim, warrior, wolf.pos.x + 6, wolf.pos.z);
+		// the warrior is visible at 6yd, well inside the rat's 10yd aggro radius
+		teleport(sim, rogue, rat.pos.x + 4, rat.pos.z);
+		teleport(sim, warrior, rat.pos.x + 6, rat.pos.z);
 		sim.castAbility("stealth", rogue.id);
 		expect(rogue.auras.some((a) => a.kind === "stealth")).toBe(true);
-		for (let i = 0; i < 20 && wolf.aiState === "idle"; i++) sim.tick();
-		expect(wolf.aiState).not.toBe("idle");
-		expect(wolf.aggroTargetId).toBe(warrior.id);
+		for (let i = 0; i < 20 && rat.aiState === "idle"; i++) sim.tick();
+		expect(rat.aiState).not.toBe("idle");
+		expect(rat.aggroTargetId).toBe(warrior.id);
 	});
 
 	it("cannot stealth in combat; acting breaks stealth; ambush requires it", () => {
