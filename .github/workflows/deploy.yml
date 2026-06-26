@@ -1,0 +1,42 @@
+# Continuous deploy: push to main -> Coolify rebuilds + redeploys ethoscraft.
+#
+# Runs on the self-hosted runner in CT 111 (PVE0), which is on the LAN, so it
+# calls Coolify's API directly at its private address — no Cloudflare Access hop
+# and no GitHub-hosted minutes (the heidihowilson account's hosted Actions are
+# billing-blocked; self-hosted runners are unaffected).
+#
+# Repo secret required: COOLIFY_TOKEN (Coolify API bearer token).
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-coolify
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: trigger Coolify deploy
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: Trigger Coolify deploy
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: m8o4k0ggk8cgc8w4kw48gsc0
+          COOLIFY_API: http://192.168.0.140:8000/api/v1
+        run: |
+          set -euo pipefail
+          if [ -z "${COOLIFY_TOKEN:-}" ]; then
+            echo "::error::missing COOLIFY_TOKEN secret"; exit 1
+          fi
+          code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -m 30 \
+            -H "Authorization: Bearer ${COOLIFY_TOKEN}" \
+            -X POST "${COOLIFY_API}/deploy?uuid=${APP_UUID}&force=false")
+          echo "Coolify deploy HTTP ${code}"; cat /tmp/resp.json 2>/dev/null || true; echo
+          if [ "${code}" != "200" ]; then
+            echo "::error::deploy failed (HTTP ${code}) — 401 = bad Coolify token"; exit 1
+          fi
+          echo "deploy queued for app ${APP_UUID}"
